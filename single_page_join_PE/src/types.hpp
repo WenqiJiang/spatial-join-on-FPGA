@@ -13,3 +13,8 @@ typedef struct {
     float top; 
     float bottom; 
 } obj_t; 
+
+typedef struct {
+    int obj_id_A;
+    int obj_id_B;
+} result_t;

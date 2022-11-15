@@ -78,3 +78,33 @@ void input_loader(
         }
     }
 }
+
+void write_results(
+    // input
+    int page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
+    hls::stream<int>& s_join_finish,  // per page pair
+    hls::stream<result_t>& s_result_pair, 
+    // out format: the first number writes total intersection count, 
+    //   while the rest are intersect ID pairs
+    const ap_uint<64>* out_intersect) {
+
+    ap_uint<64> total_intersect_count = 0;
+    while (true) {
+#pragma HLS pipeline II=1
+
+        if (!s_result_pair.empty()) {
+            total_intersect_count += 1; 
+            result_t result = s_intersect_count.read();
+            ap_uint<64> result_ap_uint_64;
+            result_ap_uint_64.range(31, 0) = result.obj_id_A;
+            result_ap_uint_64.range(63, 32) = result.obj_id_B;
+            long out_addr = total_intersect_count + 1;
+            out_intersect[out_addr] = result_ap_uint_64;
+        } else if (!s_join_finish.empty() && s_result_pair.empty()) {
+            break;
+        }
+    }
+
+    out_intersect[0] = total_intersect_count;
+
+}
