@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <chrono>
 
 #include "host.hpp"
@@ -20,47 +21,26 @@ int main(int argc, char** argv)
     std::cout << "Allocating memory...\n";
 
     // in init
-    size_t query_num = 10000;
-    size_t db_vec_num = 1000 * 1000; // evaluate on million-scale dataset
-    size_t nlist = 1;
-    size_t nprobe = 1;
-    size_t num_vec_per_row = ADC_PE_NUM;
-    size_t entries_num = db_vec_num % num_vec_per_row == 0? 
-        db_vec_num / num_vec_per_row: db_vec_num / num_vec_per_row + 1; // in 512-bit x 4
+    size_t page_entry_num = 1000;
+    // size_t page_entry_num = 999;
+    size_t page_num_A = 10; 
+    size_t page_num_B = 10; 
 
-    size_t nlist_init_bytes = 3 * nlist * sizeof(int); 
-    std::vector<int ,aligned_allocator<int >> nlist_init(nlist_init_bytes / sizeof(int));
+    // number of 512-bit entries that a page consumes 
+    size_t bytes_per_page = page_entry_num % N_OBJ_PER_AXI == 0?
+        64 * page_entry_num / N_OBJ_PER_AXI : 64 * (page_entry_num / N_OBJ_PER_AXI + 1);
+    size_t bytes_page_A = page_num_A * bytes_per_page;
+    size_t bytes_page_B = page_num_B * bytes_per_page;
 
-    for (int i = 0; i < nlist; i++) {
-        // int* nlist_PQ_codes_start_addr,
-        nlist_init[i] = 0;
-        // int* nlist_vec_ID_start_addr,
-        nlist_init[nlist + i] = 0;
-        // int* nlist_num_vecs,
-        nlist_init[2 * nlist + i] = db_vec_num; 
-    }
+    std::cout << "bytes_page_A: " << bytes_page_A << std::endl;
+    std::cout << "bytes_page_B: " << bytes_page_B << std::endl;
+    std::vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A / sizeof(int));
+    std::vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B / sizeof(int));
 
-    // in runtime (should from network)
-    size_t cell_ID_DRAM_bytes = query_num * nprobe * sizeof(int);
-    size_t LUT_DRAM_bytes = query_num * nprobe * LUT_ENTRY_NUM * M * sizeof(float);
-    std::vector<int ,aligned_allocator<int >> cell_ID_DRAM(cell_ID_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> LUT_DRAM(LUT_DRAM_bytes / sizeof(int));
-
-    // in runtime (should from DRAM)
-    size_t PQ_codes_DRAM_bytes = nlist * entries_num * 64;
-    size_t vec_ID_DRAM_bytes = nlist * (db_vec_num) * sizeof(int); // should be db_vec_num /4 (last channel slightly more)
-    std::vector<int ,aligned_allocator<int >> PQ_codes_DRAM_0(PQ_codes_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> PQ_codes_DRAM_1(PQ_codes_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> PQ_codes_DRAM_2(PQ_codes_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> PQ_codes_DRAM_3(PQ_codes_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> vec_ID_DRAM_0(vec_ID_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> vec_ID_DRAM_1(vec_ID_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> vec_ID_DRAM_2(vec_ID_DRAM_bytes / sizeof(int));
-    std::vector<int ,aligned_allocator<int >> vec_ID_DRAM_3(vec_ID_DRAM_bytes / sizeof(int));
-    
-    // out
-    size_t out_bytes = query_num * 2 * TOPK;
-    std::vector<int ,aligned_allocator<int>> out(out_bytes);
+    // size_t out_bytes = 10 * 1024 * 1024;
+    size_t out_bytes = 4 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
+    std::cout << "out_bytes: " << out_bytes << std::endl;
+    std::vector<int64_t ,aligned_allocator<int64_t>> out(out_bytes / sizeof(int64_t));
 
 // OPENCL HOST CODE AREA START
 
@@ -82,89 +62,40 @@ int main(int argc, char** argv)
     cl::Program program(context, devices, vadd_bins);
     cl::Kernel krnl_vector_add(program, "vadd");
 
-	// ------------------------------------------------------------------
-	// Create Buffers in Global Memory to store data
-	//             o) buffer_in1 - stores source_in1
-	//             o) buffer_in2 - stores source_in2
-	//             o) buffer_ouput - stores Results
-	// ------------------------------------------------------------------	
-	
-
     std::cout << "Finish loading bitstream...\n";
     // in init 
-    OCL_CHECK(err, cl::Buffer buffer_nlist_init   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            nlist_init_bytes, nlist_init.data(), &err));
-
-	// in runtime (should from network)
-    OCL_CHECK(err, cl::Buffer buffer_cell_ID_DRAM   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            cell_ID_DRAM_bytes, cell_ID_DRAM.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_LUT_DRAM   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            LUT_DRAM_bytes, LUT_DRAM.data(), &err));
-
-    // in runtime (should from DRAM)
-    OCL_CHECK(err, cl::Buffer buffer_PQ_codes_DRAM_0   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            PQ_codes_DRAM_bytes, PQ_codes_DRAM_0.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_PQ_codes_DRAM_1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            PQ_codes_DRAM_bytes, PQ_codes_DRAM_1.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_PQ_codes_DRAM_2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            PQ_codes_DRAM_bytes, PQ_codes_DRAM_2.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_PQ_codes_DRAM_3   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            PQ_codes_DRAM_bytes, PQ_codes_DRAM_3.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in_vec_ID_DRAM_0   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vec_ID_DRAM_bytes, vec_ID_DRAM_0.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in_vec_ID_DRAM_1   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vec_ID_DRAM_bytes, vec_ID_DRAM_1.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in_vec_ID_DRAM_2   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vec_ID_DRAM_bytes, vec_ID_DRAM_2.data(), &err));
-    OCL_CHECK(err, cl::Buffer buffer_in_vec_ID_DRAM_3   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
-            vec_ID_DRAM_bytes, vec_ID_DRAM_3.data(), &err));
-
+    OCL_CHECK(err, cl::Buffer buffer_in_pages_A   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            bytes_page_A, in_pages_A.data(), &err));
+    OCL_CHECK(err, cl::Buffer buffer_in_pages_B   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
+            bytes_page_B, in_pages_B.data(), &err));
 	// out
     OCL_CHECK(err, cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             out_bytes, out.data(), &err));
 
     std::cout << "Finish allocate buffer...\n";
 
-    // in init
-    OCL_CHECK(err, err = krnl_vector_add.setArg(0, int(query_num)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(1, int(nlist)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(2, int(nprobe)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(3, buffer_nlist_init));
-
-    // in runtime (should from network)
-    OCL_CHECK(err, err = krnl_vector_add.setArg(4, buffer_cell_ID_DRAM));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(5, buffer_LUT_DRAM));
-
-    // in runtime (should from DRAM)
-    OCL_CHECK(err, err = krnl_vector_add.setArg(6, buffer_PQ_codes_DRAM_0));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(7, buffer_PQ_codes_DRAM_1));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(8, buffer_PQ_codes_DRAM_2));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(9, buffer_PQ_codes_DRAM_3));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(10, buffer_in_vec_ID_DRAM_0));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(11, buffer_in_vec_ID_DRAM_1));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(12, buffer_in_vec_ID_DRAM_2));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(13, buffer_in_vec_ID_DRAM_3));
+    int arg_counter = 0;    
+    // in 
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_entry_num)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_A)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_B)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_B));
 
     // out
-    OCL_CHECK(err, err = krnl_vector_add.setArg(14, buffer_out));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_out));
 
 
     // Copy input data to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({
-        // in init
-        buffer_nlist_init,
-        // in runtime (should from network)
-        buffer_cell_ID_DRAM, 
-        buffer_LUT_DRAM, 
-        // in runtime (should from DRAM)
-        buffer_PQ_codes_DRAM_0,
-        buffer_PQ_codes_DRAM_1,
-        buffer_PQ_codes_DRAM_2,
-        buffer_PQ_codes_DRAM_3,
-        buffer_in_vec_ID_DRAM_0, 
-        buffer_in_vec_ID_DRAM_1, 
-        buffer_in_vec_ID_DRAM_2, 
-        buffer_in_vec_ID_DRAM_3},0/* 0 means from host*/));
+        // in
+        buffer_in_pages_A,
+        buffer_in_pages_B,
+        buffer_out
+        },0/* 0 means from host*/));
 
     std::cout << "Launching kernel...\n";
     // Launch the Kernel
@@ -178,10 +109,12 @@ int main(int argc, char** argv)
     auto end = std::chrono::high_resolution_clock::now();
     double duration = (std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / 1000.0);
 
-    std::cout << "Duration: " << duration << " sec" << std::endl; 
-    std::cout << "Throughput: " << float(query_num) * db_vec_num * M * NBITS / 8 / duration / (1024 * 1024 * 1024) << " GB / sec" << std::endl; 
+    std::cout << "Duration (including memcpy out): " << duration << " sec" << std::endl; 
 
-// OPENCL HOST CODE AREA END
+    std::cout << "Intersect pair number: " << out[0] << std::endl;
+    std::cout << "Overall page per second = " << (page_num_A * page_num_B) / duration << std::endl;
+    std::cout << "Number of comparison (and potentially insertion) per second = " << 
+        (page_num_A * page_num_B) * (page_entry_num * page_entry_num) / duration << std::endl;
 
     std::cout << "TEST FINISHED (NO RESULT CHECK)" << std::endl; 
 

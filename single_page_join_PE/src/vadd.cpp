@@ -14,7 +14,7 @@ void vadd(
     const ap_uint<512>* in_pages_B,
     // out format: the first number writes total intersection count, 
     //   while the rest are intersect ID pairs
-    const ap_uint<64>* out_intersect 
+    ap_uint<64>* out_intersect 
     )
 {
 // Share the same AXI interface with several control signals (but they are not allowed in same dataflow)
@@ -42,7 +42,7 @@ void vadd(
         page_num_A, // number of pages for input A
         page_num_B, // number of pages for input B
         in_pages_A,
-        in_pages_B
+        in_pages_B,
         // output
         s_page_A,
         s_page_B);
