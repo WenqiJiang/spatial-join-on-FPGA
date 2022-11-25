@@ -70,6 +70,7 @@ void vadd(
 
     write_results(
         // input
+        page_entry_num, 
         page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
         s_join_finish,  // per page pair
         s_result_pair, 

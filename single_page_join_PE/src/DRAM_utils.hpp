@@ -83,8 +83,10 @@ void input_loader(
     }
 }
 
+
 void write_results(
     // input
+    int page_entry_num,
     int page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
     hls::stream<int>& s_join_finish,  // per page pair
     hls::stream<result_t>& s_result_pair, 
@@ -93,23 +95,58 @@ void write_results(
     ap_uint<64>* out_intersect) {
 
     ap_uint<64> total_intersect_count = 0;
-    while (true) {
-#pragma HLS pipeline II=1
+    ap_uint<64> max_write_num = ap_uint<64>(page_entry_num) * ap_uint<64>(page_entry_num) * ap_uint<64>(page_pair_num);
 
-        if (!s_result_pair.empty()) {
-            total_intersect_count += 1; 
-            result_t result = s_result_pair.read();
-            ap_uint<64> result_ap_uint_64;
-            result_ap_uint_64.range(31, 0) = result.obj_id_A;
-            result_ap_uint_64.range(63, 32) = result.obj_id_B;
-            ap_uint<64> out_addr = total_intersect_count + 1;
-            out_intersect[out_addr] = result_ap_uint_64;
-        } else if (!s_join_finish.empty() && s_result_pair.empty()) {
+    // wait until the first data has come
+    while (s_join_finish.empty() && s_result_pair.empty()) {}
+
+    // addr_bias = 1;
+    for (ap_uint<64> i = 0; i < max_write_num; i++) {
+#pragma HLS pipeline II=1
+        if (!s_join_finish.empty() && s_result_pair.empty()) {
             int break_signal = s_join_finish.read(); // must read to make dataflow work
+            total_intersect_count = i; 
             break;
         }
+        result_t result = s_result_pair.read();
+        ap_uint<64> result_ap_uint_64;
+        result_ap_uint_64.range(31, 0) = result.obj_id_A;
+        result_ap_uint_64.range(63, 32) = result.obj_id_B;
+        out_intersect[i + 1] = result_ap_uint_64;
     }
 
     // write the number of intersection in the first address
     out_intersect[0] = total_intersect_count;
 }
+
+// // slow in writing, no burst inferred
+// void write_results(
+//     // input
+//     int page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
+//     hls::stream<int>& s_join_finish,  // per page pair
+//     hls::stream<result_t>& s_result_pair, 
+//     // out format: the first number writes total intersection count, 
+//     //   while the rest are intersect ID pairs
+//     ap_uint<64>* out_intersect) {
+
+//     ap_uint<64> total_intersect_count = 0;
+//     while (true) {
+// #pragma HLS pipeline II=1
+
+//         if (!s_result_pair.empty()) {
+//             total_intersect_count += 1; 
+//             result_t result = s_result_pair.read();
+//             ap_uint<64> result_ap_uint_64;
+//             result_ap_uint_64.range(31, 0) = result.obj_id_A;
+//             result_ap_uint_64.range(63, 32) = result.obj_id_B;
+//             ap_uint<64> out_addr = total_intersect_count + 1;
+//             out_intersect[out_addr] = result_ap_uint_64;
+//         } else if (!s_join_finish.empty() && s_result_pair.empty()) {
+//             int break_signal = s_join_finish.read(); // must read to make dataflow work
+//             break;
+//         }
+//     }
+
+//     // write the number of intersection in the first address
+//     out_intersect[0] = total_intersect_count;
+// }

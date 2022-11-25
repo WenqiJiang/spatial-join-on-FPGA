@@ -22,7 +22,6 @@ int main(int argc, char** argv)
 
     // in init
     size_t page_entry_num = 1000;
-    // size_t page_entry_num = 999;
     size_t page_num_A = 10; 
     size_t page_num_B = 10; 
 
@@ -76,10 +75,7 @@ int main(int argc, char** argv)
 
     int arg_counter = 0;    
     // in 
-    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_entry_num)));
-    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
-    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(1)));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_A)));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_B)));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_A));
