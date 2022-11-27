@@ -3,8 +3,8 @@ Generate a random RTree
 """
 import numpy as np
 
-from Region import MBR
-from RTree import Node
+from Index.Region import MBR
+from Index.RTree import Node
 
 def random_sub_MBR(mbr):
     """
@@ -31,6 +31,9 @@ def random_sub_MBR(mbr):
 
 
 def generate_rtree(max_level=2, directory_node_fanout=2, data_node_fanout=100, root_mbr=None):
+    """
+    Return the root node of a random R-tree generated with the input arguments
+    """
 
     assert max_level >= 2, "Level must be larger than 2 (root is a level itself)"
     if root_mbr is None:
