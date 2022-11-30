@@ -104,6 +104,14 @@ void scheduler(
     }
 }
 
-// void replicate_termination_signal() {
+template<int num_stream>
+void replicate_termination_signal(
+    hls::stream<int>& s_join_finish,
+    hls::stream<int> (&s_join_finish_replicated)[num_stream]) {
 
-// }
+    int end = s_join_finish.read();
+    for (int s = 0; s < num_stream; s++) {
+#pragma HLS unroll
+        s_join_finish_replicated[s].write(end);
+    }
+}

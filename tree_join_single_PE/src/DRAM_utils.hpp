@@ -41,6 +41,7 @@ void read_nodes(
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
     hls::stream<pair_t>& s_page_ID_pair_read_nodes,
+    hls::stream<int>& s_join_finish_replicated,
     // output
     hls::stream<node_meta_t>& s_meta_A,
     hls::stream<node_meta_t>& s_meta_B,
@@ -66,78 +67,85 @@ void read_nodes(
 
     while (true) {
 
-        pair_t page_ID_pair = s_page_ID_pair_read_nodes.read();
-        int page_ID_A = page_ID_pair.id_A;
-        int page_ID_B = page_ID_pair.id_B;
-
-        int start_addr_A = PAGE_SIZE_PER_AXI * page_ID_A;
-        int start_addr_B = PAGE_SIZE_PER_AXI * page_ID_B;
-
-        // read meta data to get the page
-        node_meta_t meta_A = parse_meta_data(in_pages_A[start_addr_A]);
-        node_meta_t meta_B = parse_meta_data(in_pages_B[start_addr_B]);
-        start_addr_A++;
-        start_addr_B++;
-
-        s_meta_A.write(meta_A);
-        s_meta_B.write(meta_B);
         
-        int max_page_entries = meta_A.count >= meta_B.count? meta_A.count : meta_B.count;
-        // number of 512-bit entries that a page contains 
-        int addr_per_page = max_page_entries % N_OBJ_PER_AXI == 0?
-            max_page_entries / N_OBJ_PER_AXI : max_page_entries / N_OBJ_PER_AXI + 1;
+        if (!s_join_finish_replicated.empty()) {
+            int end = s_join_finish_replicated.read();
+            break;
+        } else if (!s_page_ID_pair_read_nodes.empty()) {
 
-        // the 64-byte header is already counted by ++
-        for (int i = 0; i < addr_per_page; i++) {
-#pragma HLS pipeline // II=3 // needs N_OBJ_PER_AXI cycles
-            // parse the input to three outputs
-            ap_uint<512> reg_A = in_pages_A[start_addr_A + i];
-            ap_uint<512> reg_B = in_pages_B[start_addr_B + i];
+            pair_t page_ID_pair = s_page_ID_pair_read_nodes.read();
+            int page_ID_A = page_ID_pair.id_A;
+            int page_ID_B = page_ID_pair.id_B;
 
-            for (int j = 0; j < N_OBJ_PER_AXI; j++) {
+            int start_addr_A = PAGE_SIZE_PER_AXI * page_ID_A;
+            int start_addr_B = PAGE_SIZE_PER_AXI * page_ID_B;
 
-                // page A
-                ap_uint<32> id_A_ap_uint_32 = reg_A.range(
-                    j * OBJ_BITS + 32 * 1 - 1, j * OBJ_BITS + 32 * 0);
-                ap_uint<32> low0_A_ap_uint_32 = reg_A.range(
-                    j * OBJ_BITS + 32 * 2 - 1, j * OBJ_BITS + 32 * 1);
-                ap_uint<32> high0_A_ap_uint_32 = reg_A.range(
-                    j * OBJ_BITS + 32 * 3 - 1, j * OBJ_BITS + 32 * 2);
-                ap_uint<32> low1_A_ap_uint_32 = reg_A.range(
-                    j * OBJ_BITS + 32 * 4 - 1, j * OBJ_BITS + 32 * 3);
-                ap_uint<32> high1_A_ap_uint_32 = reg_A.range(
-                    j * OBJ_BITS + 32 * 5 - 1, j * OBJ_BITS + 32 * 4);
+            // read meta data to get the page
+            node_meta_t meta_A = parse_meta_data(in_pages_A[start_addr_A]);
+            node_meta_t meta_B = parse_meta_data(in_pages_B[start_addr_B]);
+            start_addr_A++;
+            start_addr_B++;
 
-                obj_t obj_A;
-                obj_A.id = *((int*) (&id_A_ap_uint_32));
-                obj_A.low0 = *((float*) (&low0_A_ap_uint_32)); 
-                obj_A.high0 = *((float*) (&high0_A_ap_uint_32)); 
-                obj_A.low1 = *((float*) (&low1_A_ap_uint_32)); 
-                obj_A.high1 = *((float*) (&high1_A_ap_uint_32)); 
-                if (i * N_OBJ_PER_AXI + j < meta_A.count) {
-                    s_page_A.write(obj_A);
-                }
+            s_meta_A.write(meta_A);
+            s_meta_B.write(meta_B);
+            
+            int max_page_entries = meta_A.count >= meta_B.count? meta_A.count : meta_B.count;
+            // number of 512-bit entries that a page contains 
+            int addr_per_page = max_page_entries % N_OBJ_PER_AXI == 0?
+                max_page_entries / N_OBJ_PER_AXI : max_page_entries / N_OBJ_PER_AXI + 1;
 
-                // Page B
-                ap_uint<32> id_B_ap_uint_32 = reg_B.range(
-                    j * OBJ_BITS + 32 * 1 - 1, j * OBJ_BITS + 32 * 0);
-                ap_uint<32> low0_B_ap_uint_32 = reg_B.range(
-                    j * OBJ_BITS + 32 * 2 - 1, j * OBJ_BITS + 32 * 1);
-                ap_uint<32> high0_B_ap_uint_32 = reg_B.range(
-                    j * OBJ_BITS + 32 * 3 - 1, j * OBJ_BITS + 32 * 2);
-                ap_uint<32> low1_B_ap_uint_32 = reg_B.range(
-                    j * OBJ_BITS + 32 * 4 - 1, j * OBJ_BITS + 32 * 3);
-                ap_uint<32> high1_B_ap_uint_32 = reg_B.range(
-                    j * OBJ_BITS + 32 * 5 - 1, j * OBJ_BITS + 32 * 4);
+            // the 64-byte header is already counted by ++
+            for (int i = 0; i < addr_per_page; i++) {
+    #pragma HLS pipeline // II=3 // needs N_OBJ_PER_AXI cycles
+                // parse the input to three outputs
+                ap_uint<512> reg_A = in_pages_A[start_addr_A + i];
+                ap_uint<512> reg_B = in_pages_B[start_addr_B + i];
 
-                obj_t obj_B;
-                obj_B.id = *((int*) (&id_B_ap_uint_32));
-                obj_B.low0 = *((float*) (&low0_B_ap_uint_32)); 
-                obj_B.high0 = *((float*) (&high0_B_ap_uint_32)); 
-                obj_B.low1 = *((float*) (&low1_B_ap_uint_32)); 
-                obj_B.high1 = *((float*) (&high1_B_ap_uint_32)); 
-                if (i * N_OBJ_PER_AXI + j < meta_B.count) {
-                    s_page_B.write(obj_B);
+                for (int j = 0; j < N_OBJ_PER_AXI; j++) {
+
+                    // page A
+                    ap_uint<32> id_A_ap_uint_32 = reg_A.range(
+                        j * OBJ_BITS + 32 * 1 - 1, j * OBJ_BITS + 32 * 0);
+                    ap_uint<32> low0_A_ap_uint_32 = reg_A.range(
+                        j * OBJ_BITS + 32 * 2 - 1, j * OBJ_BITS + 32 * 1);
+                    ap_uint<32> high0_A_ap_uint_32 = reg_A.range(
+                        j * OBJ_BITS + 32 * 3 - 1, j * OBJ_BITS + 32 * 2);
+                    ap_uint<32> low1_A_ap_uint_32 = reg_A.range(
+                        j * OBJ_BITS + 32 * 4 - 1, j * OBJ_BITS + 32 * 3);
+                    ap_uint<32> high1_A_ap_uint_32 = reg_A.range(
+                        j * OBJ_BITS + 32 * 5 - 1, j * OBJ_BITS + 32 * 4);
+
+                    obj_t obj_A;
+                    obj_A.id = *((int*) (&id_A_ap_uint_32));
+                    obj_A.low0 = *((float*) (&low0_A_ap_uint_32)); 
+                    obj_A.high0 = *((float*) (&high0_A_ap_uint_32)); 
+                    obj_A.low1 = *((float*) (&low1_A_ap_uint_32)); 
+                    obj_A.high1 = *((float*) (&high1_A_ap_uint_32)); 
+                    if (i * N_OBJ_PER_AXI + j < meta_A.count) {
+                        s_page_A.write(obj_A);
+                    }
+
+                    // Page B
+                    ap_uint<32> id_B_ap_uint_32 = reg_B.range(
+                        j * OBJ_BITS + 32 * 1 - 1, j * OBJ_BITS + 32 * 0);
+                    ap_uint<32> low0_B_ap_uint_32 = reg_B.range(
+                        j * OBJ_BITS + 32 * 2 - 1, j * OBJ_BITS + 32 * 1);
+                    ap_uint<32> high0_B_ap_uint_32 = reg_B.range(
+                        j * OBJ_BITS + 32 * 3 - 1, j * OBJ_BITS + 32 * 2);
+                    ap_uint<32> low1_B_ap_uint_32 = reg_B.range(
+                        j * OBJ_BITS + 32 * 4 - 1, j * OBJ_BITS + 32 * 3);
+                    ap_uint<32> high1_B_ap_uint_32 = reg_B.range(
+                        j * OBJ_BITS + 32 * 5 - 1, j * OBJ_BITS + 32 * 4);
+
+                    obj_t obj_B;
+                    obj_B.id = *((int*) (&id_B_ap_uint_32));
+                    obj_B.low0 = *((float*) (&low0_B_ap_uint_32)); 
+                    obj_B.high0 = *((float*) (&high0_B_ap_uint_32)); 
+                    obj_B.low1 = *((float*) (&low1_B_ap_uint_32)); 
+                    obj_B.high1 = *((float*) (&high1_B_ap_uint_32)); 
+                    if (i * N_OBJ_PER_AXI + j < meta_B.count) {
+                        s_page_B.write(obj_B);
+                    }
                 }
             }
         }
@@ -242,7 +250,7 @@ void write_results(
     hls::stream<int>& s_intersect_count_leaf, // per page pair
     hls::stream<pair_t>& s_result_pair_leaf,
     //   from the scheduler
-    hls::stream<int>& s_join_finish,  // final end signal 
+    hls::stream<int>& s_join_finish_replicated,  // final end signal 
     // out
     //    out format: the first number writes total intersection count, 
     //                while the rest are intersect ID pairs
@@ -252,7 +260,7 @@ void write_results(
     // ////// debug starts
     // int reg0 = s_intersect_count_leaf.read();
     // pair_t reg1 = s_result_pair_leaf.read();
-    // int reg2 = s_join_finish.read();
+    // int reg2 = s_join_finish_replicated.read();
 
     // out_intersect[0] = reg0;
     // out_intersect[1] = reg1.id_A;
@@ -288,8 +296,8 @@ void write_results(
         } 
         
         // the entire join is finished
-        if (!s_join_finish.empty()) {
-            int end = s_join_finish.read();
+        if (!s_join_finish_replicated.empty()) {
+            int end = s_join_finish_replicated.read();
             break;
         }
     }

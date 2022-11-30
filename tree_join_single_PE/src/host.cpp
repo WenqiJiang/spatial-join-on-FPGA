@@ -20,20 +20,27 @@ int main(int argc, char** argv)
 
     std::cout << "Allocating memory...\n";
 
-    // in init
-    size_t page_entry_num = MAX_PAGE_ENTRIES;
-    size_t page_num_A = 10; 
-    size_t page_num_B = 10; 
+    int max_level_A = 2;
+    int max_level_B = 2;
+    int root_id_A = 0;
+    int root_id_B = 0;
 
-    // number of 512-bit entries that a page consumes 
-    // size_t bytes_per_page = page_entry_num % N_OBJ_PER_AXI == 0?
-    //     64 * page_entry_num / N_OBJ_PER_AXI : 64 * (page_entry_num / N_OBJ_PER_AXI + 1);
+    // in init
+    int root_children_num = 10;
+    size_t page_num_A = 1 + root_children_num; // root and first level children
+    size_t page_num_B = 1 + root_children_num; // root and first level children
+
     size_t bytes_page_A = page_num_A * PAGE_SIZE;
     size_t bytes_page_B = page_num_B * PAGE_SIZE;
 
     std::cout << "bytes per page: " << PAGE_SIZE << std::endl;
     std::vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A);
     std::vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B);
+
+    // size_t out_bytes = 10 * 1024 * 1024;
+    size_t layer_cache_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
+    std::cout << "layer_cache_bytes: " << layer_cache_bytes << std::endl;
+    std::vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t));
 
     // size_t out_bytes = 10 * 1024 * 1024;
     size_t out_bytes = 4 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
@@ -48,15 +55,29 @@ int main(int argc, char** argv)
     //     int count;    // valid items
     //     obj_t obj;    // id/ptr + mbr
     // } node_meta_t;
-    for (int i = 0; i < page_num_A; i++) {
+    
+    // root 
+    in_pages_A[0] = 0; // is_leaf
+    in_pages_A[1] = MAX_PAGE_ENTRIES; // valid items
+    in_pages_A[2] = 0; // id items
+
+    
+    in_pages_B[0] = 0; // is_leaf
+    in_pages_B[1] = MAX_PAGE_ENTRIES; // valid items
+    in_pages_B[2] = 0; // id items
+
+    // data nodes
+    for (int i = 1; i < page_num_A; i++) {
         int bias = i * PAGE_SIZE / sizeof(int);
-        in_pages_A[bias] = 0; // is_leaf
+        in_pages_A[bias] = 1; // is_leaf
         in_pages_A[bias + 1] = MAX_PAGE_ENTRIES; // valid items
+        in_pages_A[bias + 2] = i; // id
     }
-    for (int i = 0; i < page_num_B; i++) {
+    for (int i = 1; i < page_num_B; i++) {
         int bias = i * PAGE_SIZE / sizeof(int);
-        in_pages_B[bias] = 0; // is_leaf
+        in_pages_B[bias] = 1; // is_leaf
         in_pages_B[bias + 1] = MAX_PAGE_ENTRIES; // valid items
+        in_pages_B[bias + 2] = i; // id
     }
 // OPENCL HOST CODE AREA START
 
@@ -84,6 +105,9 @@ int main(int argc, char** argv)
             bytes_page_A, in_pages_A.data(), &err));
     OCL_CHECK(err, cl::Buffer buffer_in_pages_B   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             bytes_page_B, in_pages_B.data(), &err));
+    // in & out
+    OCL_CHECK(err, cl::Buffer buffer_layer_cache(context,CL_MEM_USE_HOST_PTR, 
+            layer_cache_bytes, layer_cache.data(), &err));
 	// out
     OCL_CHECK(err, cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             out_bytes, out.data(), &err));
@@ -92,11 +116,15 @@ int main(int argc, char** argv)
 
     int arg_counter = 0;    
     // in 
-    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_entry_num)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_A)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(page_num_B)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_A)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_B)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_A)));
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_B)));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_A));
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_B));
+
+    // in & out
+    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_layer_cache));
 
     // out
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_out));
@@ -107,6 +135,7 @@ int main(int argc, char** argv)
         // in
         buffer_in_pages_A,
         buffer_in_pages_B,
+        buffer_layer_cache,
         buffer_out
         },0/* 0 means from host*/));
 
@@ -126,8 +155,6 @@ int main(int argc, char** argv)
 
     std::cout << "Intersect pair number: " << out[0] << std::endl;
     std::cout << "Overall page per second = " << (page_num_A * page_num_B) / duration << std::endl;
-    std::cout << "Number of comparison (and potentially insertion) per second = " << 
-        (page_num_A * page_num_B) * (page_entry_num * page_entry_num) / duration << std::endl;
 
     std::cout << "TEST FINISHED (NO RESULT CHECK)" << std::endl; 
 

@@ -49,11 +49,19 @@ void vadd(
     hls::stream<obj_t> s_page_B;
 #pragma HLS stream variable=s_page_B depth=512
 
+    hls::stream<int> s_join_finish; 
+#pragma HLS stream variable=s_join_finish depth=512
+
+    hls::stream<int> s_join_finish_replicated[3]; 
+#pragma HLS stream variable=s_join_finish_replicated depth=512
+#pragma HLS array_partition variable=s_join_finish_replicated
+
     read_nodes(
         // input
         in_pages_A,
         in_pages_B,
         s_page_ID_pair_read_nodes,
+        s_join_finish_replicated[0],
         // output
         s_meta_A,
         s_meta_B,
@@ -80,9 +88,6 @@ void vadd(
 #pragma HLS stream variable=s_write_layer_id depth=512
 
 
-    hls::stream<int> s_join_finish; 
-#pragma HLS stream variable=s_join_finish depth=512
-
     int max_level = max_level_A > max_level_B ? max_level_A: max_level_B;
 
     scheduler(
@@ -102,6 +107,11 @@ void vadd(
         //   to the write results PE
         s_join_finish         // the final termination signal 
     );
+
+
+    replicate_termination_signal<3>(
+        s_join_finish,
+        s_join_finish_replicated); 
 
     hls::stream<int> s_intersect_count_directory;
 #pragma HLS stream variable=s_intersect_count_directory depth=512
@@ -143,6 +153,7 @@ void vadd(
         s_meta_B,
         s_page_A,
         s_page_B,
+        s_join_finish_replicated[1],
         // output
         //   for directory nodes: 
         s_intersect_count_directory, // per page pair
@@ -158,7 +169,7 @@ void vadd(
         s_intersect_count_leaf, // per page pair
         s_result_pair_leaf,
         //   from the scheduler
-        s_join_finish,  // final end signal 
+        s_join_finish_replicated[2],  // final end signal 
         // out
         //    out format: the first number writes total intersection count, 
         //                while the rest are intersect ID pairs
