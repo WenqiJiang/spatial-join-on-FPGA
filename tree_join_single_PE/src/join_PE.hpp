@@ -1,28 +1,53 @@
 #pragma once
 
+#include "types.hpp"
+
 // join between node pairs
 // if both the nodes are leaf, write to the results
 // if at least on of the nodes is directory, write to layer cache 
 void join_page(
     // input
-    int page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
     hls::stream<node_meta_t>& s_meta_A,
     hls::stream<node_meta_t>& s_meta_B,
     hls::stream<obj_t>& s_page_A,
     hls::stream<obj_t>& s_page_B,
     // output
     //   for directory nodes: 
-    hls::stream<ap_uint<64> >& s_intersect_count_directory, // per page pair
-    hls::stream<result_t>& s_result_pair_directory,
+    hls::stream<int>& s_intersect_count_directory, // per page pair
+    hls::stream<pair_t>& s_result_pair_directory,
     //   for leaf nodes: 
-    hls::stream<ap_uint<64> >& s_intersect_count_leaf, // per page pair
-    hls::stream<result_t>& s_result_pair_leaf
+    hls::stream<int>& s_intersect_count_leaf, // per page pair
+    hls::stream<pair_t>& s_result_pair_leaf
     ) {
+
+    // ////// debug starts
+
+    // node_meta_t reg0 = s_meta_A.read();
+    // node_meta_t reg1 = s_meta_B.read();
+    // obj_t reg2 = s_page_A.read();
+    // obj_t reg3 = s_page_B.read();
+
+    // int reg_a = reg0.is_leaf + reg1.is_leaf;
+    // pair_t reg_b;
+    // reg_b.id_A = reg2.id;
+    // reg_b.id_B = reg3.id;
+
+    // s_intersect_count_directory.write(reg_a);
+    // s_result_pair_directory.write(reg_b);
+
+    // s_intersect_count_leaf.write(reg_a);
+    // s_result_pair_leaf.write(reg_b);
+
+    // ////// debug ends
+
 
     obj_t page_A[MAX_PAGE_ENTRY_NUM];
     obj_t page_B[MAX_PAGE_ENTRY_NUM];
 
-    while (true) {
+    // WENQI: as an HLS defect, somehow this loop cannot be compiled successfully using while
+    //   so I have to use a counter that counts to (almost infinite) to solve the problem
+    // for (long infinite_counter = 0; infinite_counter < 1000 * 1000 * 1000 * 1000; infinite_counter++) {
+    // while (true) {
 
         node_meta_t meta_A = s_meta_A.read();
         node_meta_t meta_B = s_meta_B.read();
@@ -44,7 +69,7 @@ void join_page(
         // for the case where both trees are data nodes or directory nodes, join directly
         if ((meta_A.is_leaf && meta_B.is_leaf) || (!meta_A.is_leaf && !meta_B.is_leaf)) {
 
-            ap_uint<64> intersect_count = 0;
+            int intersect_count = 0;
             LOOP_A:
             for (int m = 0; m < meta_A.count; m++) {
 
@@ -74,7 +99,7 @@ void join_page(
 
                     if (overlap) {
                         intersect_count++;
-                        result_t result;
+                        pair_t result;
                         result.id_A = obj_A.id;
                         result.id_B = obj_B.id;
                         if (meta_A.is_leaf && meta_B.is_leaf) {
@@ -108,7 +133,7 @@ void join_page(
                 count = meta_A.count;
             }
 
-            ap_uint<64> intersect_count = 0;
+            int intersect_count = 0;
             LOOP_C:
             for (int n = 0; n < count; n++) {
 #pragma HLS pipeline II=1
@@ -133,7 +158,7 @@ void join_page(
 
                 if (overlap) {
                     intersect_count++;
-                    result_t result;
+                    pair_t result;
                     result.id_A = leaf_obj.id;
                     result.id_B = dir_obj.id;
                     s_result_pair_directory.write(result);
@@ -141,5 +166,5 @@ void join_page(
             }
             s_intersect_count_directory.write(intersect_count);
         }
-    }
+    // }
 }

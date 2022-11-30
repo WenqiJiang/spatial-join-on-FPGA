@@ -46,4 +46,4 @@ typedef struct {
     //   or pointer to the children (directory nodes)
     int id_A;
     int id_B;
-} result_t;
+} pair_t;

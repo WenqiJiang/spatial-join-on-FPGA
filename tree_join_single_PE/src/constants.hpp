@@ -11,6 +11,8 @@
 
 #define LAYER_CACHE_SIZE (MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES * 8) // 8 = 2 x int
 
+#define MAX_TREE_LEVEL 32
+
 #define OBJ_BYTES 20 // 20 bytes (1 * id + 4 * boundary)
 #define OBJ_BITS (OBJ_BYTES * 8) // 20 bytes (1 * id + 4 * boundary)
 #define N_OBJ_PER_AXI 3 // 64 bytes can accommodate 3 objects 

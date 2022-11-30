@@ -32,8 +32,8 @@ int main(int argc, char** argv)
     size_t bytes_page_B = page_num_B * PAGE_SIZE;
 
     std::cout << "bytes per page: " << PAGE_SIZE << std::endl;
-    std::vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A);
-    std::vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B);
+    std::vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A, 0);
+    std::vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B, 0);
 
     // size_t out_bytes = 10 * 1024 * 1024;
     size_t out_bytes = 4 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
@@ -50,12 +50,12 @@ int main(int argc, char** argv)
     // } node_meta_t;
     for (int i = 0; i < page_num_A; i++) {
         int bias = i * PAGE_SIZE / sizeof(int);
-        in_pages_A[bias] = 0; // is_leaf
+        in_pages_A[bias] = 1; // is_leaf
         in_pages_A[bias + 1] = MAX_PAGE_ENTRIES; // valid items
     }
     for (int i = 0; i < page_num_B; i++) {
         int bias = i * PAGE_SIZE / sizeof(int);
-        in_pages_B[bias] = 0; // is_leaf
+        in_pages_B[bias] = 1; // is_leaf
         in_pages_B[bias + 1] = MAX_PAGE_ENTRIES; // valid items
     }
 // OPENCL HOST CODE AREA START

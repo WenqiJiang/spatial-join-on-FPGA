@@ -1,9 +1,11 @@
 #pragma once
 
 #include "types.hpp"
+#include "utils.hpp"
 
 // Given an input 64-byte representation, parse it as node meta data type
-inline node_meta_t parse_meta_data(ap_uint<512> in_uint512) {
+node_meta_t parse_meta_data(ap_uint<512> in_uint512) {
+#pragma HLS inline
 
     node_meta_t meta_data;
 
@@ -38,8 +40,7 @@ void read_nodes(
     // input
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
-    hls::stream<int>& s_page_ID_A,
-    hls::stream<int>& s_page_ID_B,
+    hls::stream<pair_t>& s_page_ID_pair_read_nodes,
     // output
     hls::stream<node_meta_t>& s_meta_A,
     hls::stream<node_meta_t>& s_meta_B,
@@ -47,10 +48,27 @@ void read_nodes(
     hls::stream<obj_t>& s_page_B
     ) {
     
+    // ////// debug starts
+    // pair_t reg_p = s_page_ID_pair_read_nodes.read();
+    // node_meta_t reg_n;
+    // obj_t reg_o; 
+    // reg_n.is_leaf = reg_p.id_A;
+    // reg_o.id = reg_p.id_A;
+
+    // s_meta_A.write(reg_n);
+    // s_meta_B.write(reg_n);
+
+    // s_page_A.write(reg_o);
+    // s_page_B.write(reg_o);
+
+    // ////// debug ends
+
+
     while (true) {
 
-        int page_ID_A = s_page_ID_A.read();
-        int page_ID_B = s_page_ID_B.read();
+        pair_t page_ID_pair = s_page_ID_pair_read_nodes.read();
+        int page_ID_A = page_ID_pair.id_A;
+        int page_ID_B = page_ID_pair.id_B;
 
         int start_addr_A = PAGE_SIZE_PER_AXI * page_ID_A;
         int start_addr_B = PAGE_SIZE_PER_AXI * page_ID_B;
@@ -127,22 +145,47 @@ void read_nodes(
 }
 
 
-void layer_cache_controller(
+void layer_cache_memory_controller(
     // input
+    //   argument
+    int root_id_A,
+    int root_id_B,
     //   memory 
     ap_uint<64>* layer_cache,
     //   from join PE
-    hls::stream<ap_uint<64> >& s_intersect_count_directory, 
-    hls::stream<result_t>& s_result_pair_directory,
+    hls::stream<int>& s_intersect_count_directory, 
+    hls::stream<pair_t>& s_result_pair_directory,
     //   from scheduler
     hls::stream<int>& s_read_write_control, // 0 -> read from memory; 1 -> write to memory 
-    hls::stream<int>& s_write_layer_id, 
     hls::stream<int>& s_read_layer_id,      // layer l 
     hls::stream<int>& s_read_layer_pointer, // pair p in layer l
+    hls::stream<int>& s_write_layer_id, 
     // output
     //   to scheduler
-    hls::stream<result_t>& s_page_pair
+    hls::stream<pair_t>& s_page_pair_scheduler,      // for read request, return pair
+    hls::stream<int>& s_intersect_count_directory_scheduler // for write request, return count
 ) {
+
+    // ////// debug starts
+
+    // s_page_pair_scheduler.write(s_result_pair_directory.read());
+
+    // int reg = s_intersect_count_directory.read() + 
+    //     s_read_write_control.read() + 
+    //     s_read_layer_id.read() + 
+    //     s_read_layer_pointer.read() + 
+    //     s_write_layer_id.read();
+    // s_intersect_count_directory_scheduler.write(reg);
+
+    // ////// debug ends
+
+
+    // Initialization: write the pair (rootA, rootB) in layer cache 0
+    pair_t root_pair;
+    root_pair.id_A = root_id_A;
+    root_pair.id_B = root_id_B;
+    ap_uint<64> root_ap_uint_64 = pack_pair(root_pair);
+    layer_cache[0] = root_ap_uint_64; 
 
     // Order:
     //   1. receive a signal from the scheduler: indicating whether it wants to write to / read from memory
@@ -162,24 +205,30 @@ void layer_cache_controller(
             int write_layer_id = s_write_layer_id.read();
             int start_addr = write_layer_id * (LAYER_CACHE_SIZE / 8); 
 
+            bool reach_end = true; 
             for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
 #pragma HLS pipeline II=1
                 if (!s_intersect_count_directory.empty() && s_result_pair_directory.empty()) {
-                    int count = s_intersect_count_directory.read(); // must read to make dataflow work
+                    int count = s_intersect_count_directory.read(); 
+                    s_intersect_count_directory_scheduler.write(count);
+                    reach_end = false;
                     break;
                 }
-                result_t result = s_result_pair_directory.read();
-                ap_uint<64> result_ap_uint_64;
-                result_ap_uint_64.range(31, 0) = result.id_A;
-                result_ap_uint_64.range(63, 32) = result.id_B;
+                pair_t result = s_result_pair_directory.read();
+                ap_uint<64> result_ap_uint_64 =pack_pair(result);
                 layer_cache[start_addr + i] = result_ap_uint_64;
+            }
+            if (reach_end) { // maximum results, haven't read the count yet 
+                int count = s_intersect_count_directory.read(); 
+                s_intersect_count_directory_scheduler.write(count);
             }
         } else { // read 
             int read_layer_id = s_read_layer_id.read();
             int read_layer_pointer = s_read_layer_pointer.read();
             int addr = read_layer_id * (LAYER_CACHE_SIZE / 8) + read_layer_pointer; 
 
-            s_page_pair.write(layer_cache[addr]);
+            pair_t next_page_pair = unpack_pair(layer_cache[addr]);
+            s_page_pair_scheduler.write(next_page_pair);
         }
     }
 }
@@ -190,16 +239,29 @@ void layer_cache_controller(
 void write_results(
     // input
     //   from join PE
-    hls::stream<ap_uint<64> >& s_intersect_count_leaf, // per page pair
-    hls::stream<result_t>& s_result_pair_leaf
+    hls::stream<int>& s_intersect_count_leaf, // per page pair
+    hls::stream<pair_t>& s_result_pair_leaf,
     //   from the scheduler
     hls::stream<int>& s_join_finish,  // final end signal 
     // out
-    //   out format: the first number writes total intersection count, 
-    //               while the rest are intersect ID pairs
+    //    out format: the first number writes total intersection count, 
+    //                while the rest are intersect ID pairs
     ap_uint<64>* out_intersect) {
 
     
+    // ////// debug starts
+    // int reg0 = s_intersect_count_leaf.read();
+    // pair_t reg1 = s_result_pair_leaf.read();
+    // int reg2 = s_join_finish.read();
+
+    // out_intersect[0] = reg0;
+    // out_intersect[1] = reg1.id_A;
+    // out_intersect[2] = reg1.id_B;
+    // out_intersect[3] = reg2;
+
+    // ////// debug ends
+
+
     ap_uint<64> total_intersect_count = 0;
     const int bias = 1; // the first number writes total intersection count, 
     
@@ -208,17 +270,20 @@ void write_results(
         // if data is available, finish writing results of a pair of node join
         if (!s_result_pair_leaf.empty()) {
 
+            bool reach_end = true; 
             for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
 #pragma HLS pipeline II=1
                 if (!s_intersect_count_leaf.empty() && s_result_pair_leaf.empty()) {
-                    total_intersect_count += s_intersect_count_leaf.read(); // must read to make dataflow work
+                    total_intersect_count += s_intersect_count_leaf.read(); 
+                    reach_end = false;
                     break;
                 }
-                result_t result = s_result_pair_leaf.read();
-                ap_uint<64> result_ap_uint_64;
-                result_ap_uint_64.range(31, 0) = result.id_A;
-                result_ap_uint_64.range(63, 32) = result.id_B;
+                pair_t result = s_result_pair_leaf.read();
+                ap_uint<64> result_ap_uint_64 = pack_pair(result);
                 out_intersect[total_intersect_count + i + bias] = result_ap_uint_64;
+            }
+            if (reach_end) { // maximum results, haven't read the count yet 
+                total_intersect_count += s_intersect_count_leaf.read();
             }
         } 
         

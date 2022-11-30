@@ -59,7 +59,7 @@ void input_loader(
 
             s_meta_A.write(meta_A);
             s_meta_B.write(meta_B);
-            
+
             int max_page_entries = meta_A.count >= meta_B.count? meta_A.count : meta_B.count;
             // number of 512-bit entries that a page contains 
             int addr_per_page = max_page_entries % N_OBJ_PER_AXI == 0?
@@ -138,26 +138,29 @@ void write_results(
     ap_uint<64>* out_intersect) {
 
     ap_uint<64> total_intersect_count = 0;
+    const int bias = 1; // the first number writes total intersection count, 
 
 
     for (int i = 0; i < page_pair_num; i++) {
 
-        while (true) {
+        bool reach_end = true; 
+        for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
 #pragma HLS pipeline II=1
-
-            if (!s_result_pair.empty()) {
-                total_intersect_count += 1; 
-                result_t result = s_result_pair.read();
-                ap_uint<64> result_ap_uint_64;
-                result_ap_uint_64.range(31, 0) = result.id_A;
-                result_ap_uint_64.range(63, 32) = result.id_B;
-                ap_uint<64> out_addr = total_intersect_count + 1;
-                out_intersect[out_addr] = result_ap_uint_64;
-            } else if (!s_join_finish.empty() && s_result_pair.empty()) {
+            if (!s_join_finish.empty() && s_result_pair.empty()) {
                 int break_signal = s_join_finish.read(); // must read to make dataflow work
                 total_intersect_count += s_intersect_count.read();
+                reach_end = false;
                 break;
             }
+            result_t result = s_result_pair.read();
+            ap_uint<64> result_ap_uint_64;
+            result_ap_uint_64.range(31, 0) = result.id_A;
+            result_ap_uint_64.range(63, 32) = result.id_B;
+            out_intersect[total_intersect_count + i + bias] = result_ap_uint_64;
+        }
+        if (reach_end) { // maximum results, haven't read the count yet 
+            int break_signal = s_join_finish.read(); // must read to make dataflow work
+            total_intersect_count += s_intersect_count.read();
         }
     }
 

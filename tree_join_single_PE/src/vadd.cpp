@@ -1,17 +1,22 @@
 #include "constants.hpp"
 #include "DRAM_utils.hpp"
 #include "join_PE.hpp"
+#include "scheduler.hpp"
 #include "types.hpp"
 
 extern "C" {
 
 void vadd(  
-    int page_num_A, // number of pages for input A
-    int page_num_B, // number of pages for input B
+    int max_level_A,
+    int max_level_B,
+    int root_id_A,
+    int root_id_B,
     // in runtime (should from DRAM)
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
-    // out format: the first number writes total intersection count, 
+    // out (intermediate)
+    ap_uint<64>* layer_cache,
+    // out (result) format: the first number writes total intersection count, 
     //   while the rest are intersect ID pairs
     ap_uint<64>* out_intersect 
     )
@@ -24,66 +29,140 @@ void vadd(
 #pragma HLS INTERFACE m_axi port=in_pages_B offset=slave bundle=gmem1
 
 // out
-#pragma HLS INTERFACE m_axi port=out_intersect  offset=slave bundle=gmem2
+#pragma HLS INTERFACE m_axi port=layer_cache  offset=slave bundle=gmem2
+#pragma HLS INTERFACE m_axi port=out_intersect  offset=slave bundle=gmem3
 
 #pragma HLS dataflow
 
 ////////////////////     First Half: ADC     ////////////////////
-
-    hls::stream<obj_t> s_page_A;
-#pragma HLS stream variable=s_page_A depth=512
-    hls::stream<obj_t> s_page_B;
-#pragma HLS stream variable=s_page_B depth=512
+    
+    hls::stream<pair_t> s_page_ID_pair_read_nodes;
+#pragma HLS stream variable=s_page_ID_pair_read_nodes depth=512
 
     hls::stream<node_meta_t> s_meta_A;
 #pragma HLS stream variable=s_meta_A depth=512
     hls::stream<node_meta_t> s_meta_B;
 #pragma HLS stream variable=s_meta_B depth=512
 
-    input_loader(
+    hls::stream<obj_t> s_page_A;
+#pragma HLS stream variable=s_page_A depth=512
+    hls::stream<obj_t> s_page_B;
+#pragma HLS stream variable=s_page_B depth=512
+
+    read_nodes(
         // input
-        page_num_A, // number of pages for input A
-        page_num_B, // number of pages for input B
         in_pages_A,
         in_pages_B,
+        s_page_ID_pair_read_nodes,
         // output
         s_meta_A,
         s_meta_B,
         s_page_A,
-        s_page_B);
+        s_page_B
+        );
 
-    hls::stream<result_t> s_result_pair;
-#pragma HLS stream variable=s_result_pair depth=512
+    hls::stream<pair_t> s_page_pair_scheduler;
+#pragma HLS stream variable=s_page_pair_scheduler depth=512
 
+    hls::stream<int> s_intersect_count_directory_scheduler;
+#pragma HLS stream variable=s_intersect_count_directory_scheduler depth=512
 
-    hls::stream<ap_uint<64> > s_intersect_count; 
-#pragma HLS stream variable=s_intersect_count depth=512
+    hls::stream<int> s_read_write_control;
+#pragma HLS stream variable=s_read_write_control depth=512
+
+    hls::stream<int> s_read_layer_id;
+#pragma HLS stream variable=s_read_layer_id depth=512
+
+    hls::stream<int> s_read_layer_pointer;
+#pragma HLS stream variable=s_read_layer_pointer depth=512
+
+    hls::stream<int> s_write_layer_id;
+#pragma HLS stream variable=s_write_layer_id depth=512
+
 
     hls::stream<int> s_join_finish; 
 #pragma HLS stream variable=s_join_finish depth=512
 
-    int page_pair_num = page_num_A * page_num_B;
+    int max_level = max_level_A > max_level_B ? max_level_A: max_level_B;
+
+    scheduler(
+        // Input
+        max_level,  // max(level_A, level_B)
+        //   from layer cache controller
+        s_page_pair_scheduler,      // for read request, return pair
+        s_intersect_count_directory_scheduler, // for write request, return count
+        // Output
+        //   to layer cache controller
+        s_read_write_control, // 0 -> read from memory; 1 -> write to memory 
+        s_read_layer_id,      // layer l 
+        s_read_layer_pointer, // pair p in layer l
+        s_write_layer_id, 
+        //   to node reading PE
+        s_page_ID_pair_read_nodes,
+        //   to the write results PE
+        s_join_finish         // the final termination signal 
+    );
+
+    hls::stream<int> s_intersect_count_directory;
+#pragma HLS stream variable=s_intersect_count_directory depth=512
+
+    hls::stream<pair_t> s_result_pair_directory;
+#pragma HLS stream variable=s_result_pair_directory depth=512
+
+    layer_cache_memory_controller(
+        // input
+        //   argument
+        root_id_A,
+        root_id_B,
+        //   memory 
+        layer_cache,
+        //   from join PE
+        s_intersect_count_directory, 
+        s_result_pair_directory,
+        //   from scheduler
+        s_read_write_control, // 0 -> read from memory; 1 -> write to memory 
+        s_read_layer_id,      // layer l 
+        s_read_layer_pointer, // pair p in layer l
+        s_write_layer_id, 
+        // output
+        //   to scheduler
+        s_page_pair_scheduler,      // for read request, return pair
+        s_intersect_count_directory_scheduler // for write request, return count
+    );
+
+    hls::stream<int> s_intersect_count_leaf; 
+#pragma HLS stream variable=s_intersect_count_leaf depth=512
+
+    hls::stream<pair_t> s_result_pair_leaf;
+#pragma HLS stream variable=s_result_pair_leaf depth=512
+
+
     join_page(
         // input
-        page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
         s_meta_A,
         s_meta_B,
         s_page_A,
         s_page_B,
         // output
-        s_intersect_count, 
-        s_join_finish,
-        s_result_pair);
+        //   for directory nodes: 
+        s_intersect_count_directory, // per page pair
+        s_result_pair_directory,
+        //   for leaf nodes: 
+        s_intersect_count_leaf, // per page pair
+        s_result_pair_leaf
+        );
 
     write_results(
         // input
-        page_pair_num, // number of page pairs to join, e.g., page_num_A * page_num_B
-        s_intersect_count, 
-        s_join_finish,  // per page pair
-        s_result_pair, 
-        // out format: the first number writes total intersection count, 
-        //   while the rest are intersect ID pairs
-        out_intersect);    
+        //   from join PE
+        s_intersect_count_leaf, // per page pair
+        s_result_pair_leaf,
+        //   from the scheduler
+        s_join_finish,  // final end signal 
+        // out
+        //    out format: the first number writes total intersection count, 
+        //                while the rest are intersect ID pairs
+        out_intersect);
 }
 
 }
