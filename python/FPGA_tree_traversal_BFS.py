@@ -36,15 +36,17 @@ class FPGA_tree_traversal_BFS:
         """
 
         # The states of the scheduler
-        num_pairs_per_level = dict()
-        level_cache = dict() # the results of level-l join == pairs of level l+1
+        num_pairs_per_level = dict() # number of results in layer l 
+        level_cache = [] # a single big array, the starting address of each layer is recorded
+        start_addr_per_layer = dict() # the starting address of results in layer l
         for i in range(1, self.max_level):
             num_pairs_per_level[i] = 0
-            level_cache[i] = []
 
         # put root A and root B to level 0 cache
         num_pairs_per_level[0] = 1
-        level_cache[0] = [(root_A, root_B)]
+        start_addr_per_layer[0] = 0
+        level_cache += [(root_A, root_B)]
+        start_addr_per_layer[1] = 1
 
         current_level = 1 # the level where join happens, the results are pairs one level below
         
@@ -56,16 +58,21 @@ class FPGA_tree_traversal_BFS:
                 break
 
             temp_results = []
-            for node_A, node_B in level_cache[current_level - 1]:
+            for i in range(num_pairs_per_level[current_level - 1]):
+                addr = start_addr_per_layer[current_level - 1] + i
+                print("level: {}, addr {}".format(
+                    current_level, addr))
+                node_A, node_B = level_cache[addr]
                 temp_results += self.join_nodes(node_A, node_B)
 
             
             if current_level == self.max_level:
                 self.results = temp_results
             else:
-                level_cache[current_level] = temp_results
+                level_cache += temp_results
                 num_pairs_per_level[current_level] = len(temp_results)
-                # print(num_pairs_per_level[current_level])
+                start_addr_per_layer[current_level + 1] = start_addr_per_layer[current_level] + num_pairs_per_level[current_level]
+                print(num_pairs_per_level[current_level])
 
         return self.results
 
