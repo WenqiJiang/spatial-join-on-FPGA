@@ -4,7 +4,7 @@ from Index.Region import MBR
 from Index.RTree import Node, sync_traversal, join_data_nodes
 from Index.Tree_generation import generate_rtree
 
-class FPGA_tree_traversal:
+class FPGA_tree_traversal_DFS:
 
     level_tree_A = None 
     level_tree_B = None
@@ -169,7 +169,7 @@ if __name__ == '__main__':
         print("Result length: {}".format(len(results_sync)))
 
         print("FPGA A join B:")
-        traversal_instance = FPGA_tree_traversal(level_tree_A, level_tree_B)
+        traversal_instance = FPGA_tree_traversal_DFS(level_tree_A, level_tree_B)
         results_FPGA = traversal_instance.join_nodes_scheduler(root_A, root_B)
         print("Result length: {}".format(len(results_FPGA)))
         assert len(results_FPGA) == len(results_sync)

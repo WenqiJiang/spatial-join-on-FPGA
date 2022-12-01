@@ -52,10 +52,9 @@ void read_nodes(
 #ifdef DEBUG_read_nodes
     ////// debug starts
     pair_t reg_p = s_page_ID_pair_read_nodes.read();
-    int reg_i = s_join_finish_replicated.read();
     node_meta_t reg_n;
     obj_t reg_o; 
-    reg_n.is_leaf = reg_p.id_A + reg_i;
+    reg_n.is_leaf = reg_p.id_A;
     reg_o.id = reg_p.id_A;
 
     s_meta_A.write(reg_n);
@@ -63,6 +62,8 @@ void read_nodes(
 
     s_page_A.write(reg_o);
     s_page_B.write(reg_o);
+
+    int reg_i = s_join_finish_replicated.read();
 
     ////// debug ends
 #else
@@ -181,15 +182,27 @@ void layer_cache_memory_controller(
 #ifdef DEBUG_layer_cache_memory_controller
     ////// debug starts
 
-    s_page_pair_scheduler.write(s_result_pair_directory.read());
+    // get read request, and return pair
+    int read = s_read_write_control.read();
+    int layer_id = s_read_layer_id.read();
+    int layer_pointer = s_read_layer_pointer.read();
+    int sum = read + layer_id + layer_pointer;
+    pair_t pair;
+    pair.id_A = sum;
+    s_page_pair_scheduler.write(pair);
 
-    int reg = s_intersect_count_directory.read() + 
-        s_read_write_control.read() + 
-        s_read_layer_id.read() + 
-        s_read_layer_pointer.read() + 
-        s_write_layer_id.read() + 
-        s_join_finish_replicated.read();
-    s_intersect_count_directory_scheduler.write(reg);
+    // get write requests, and write results
+    int write = s_read_write_control.read() + s_write_layer_id.read();
+    int count = s_intersect_count_directory.read() + write;
+    s_intersect_count_directory_scheduler.write(count);
+    pair_t result = s_result_pair_directory.read();
+    for (int i = 0; i < count; i++) {
+        layer_cache[i] = result.id_A;
+    }
+
+    // end 
+    int end = s_join_finish_replicated.read();
+
 
     ////// debug ends
 #else
@@ -273,12 +286,11 @@ void write_results(
     ////// debug starts
     int reg0 = s_intersect_count_leaf.read();
     pair_t reg1 = s_result_pair_leaf.read();
-    int reg2 = s_join_finish_replicated.read();
 
     out_intersect[0] = reg0;
     out_intersect[1] = reg1.id_A;
-    out_intersect[2] = reg1.id_B;
-    out_intersect[3] = reg2;
+    
+    int end = s_join_finish_replicated.read();
 
     ////// debug ends
 #else 

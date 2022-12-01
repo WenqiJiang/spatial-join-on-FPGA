@@ -24,14 +24,21 @@ void scheduler(
 
 #ifdef DEBUG_scheduler
     ////// debug starts
-    s_page_ID_pair_read_nodes.write(s_page_pair_scheduler.read());
     
+    
+    // send read request, and get a pair
+    s_read_write_control.write(0);
+    s_read_layer_id.write(0);
+    s_read_layer_pointer.write(0);
+    pair_t pair = s_page_pair_scheduler.read();
+    // also send to read nodes
+    s_page_ID_pair_read_nodes.write(pair);
+
+    // send write requests
+    s_read_write_control.write(1);
+    s_write_layer_id.write(0);
     int reg = s_intersect_count_directory_scheduler.read();
         
-    s_read_write_control.read(reg);
-    s_read_layer_id.read(reg);
-    s_read_layer_pointer.read(reg);
-    s_write_layer_id.read(reg);
     s_join_finish.write(reg);
 
     ////// debug ends
