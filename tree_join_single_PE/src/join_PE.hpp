@@ -21,26 +21,28 @@ void join_page(
     hls::stream<pair_t>& s_result_pair_leaf
     ) {
 
-    // ////// debug starts
+#ifdef DEBUG_join_page
+    ////// debug starts
 
-    // node_meta_t reg0 = s_meta_A.read();
-    // node_meta_t reg1 = s_meta_B.read();
-    // obj_t reg2 = s_page_A.read();
-    // obj_t reg3 = s_page_B.read();
+    node_meta_t reg0 = s_meta_A.read();
+    node_meta_t reg1 = s_meta_B.read();
+    obj_t reg2 = s_page_A.read();
+    obj_t reg3 = s_page_B.read();
+    int reg4 = s_join_finish_replicated.read();
 
-    // int reg_a = reg0.is_leaf + reg1.is_leaf;
-    // pair_t reg_b;
-    // reg_b.id_A = reg2.id;
-    // reg_b.id_B = reg3.id;
+    int reg_a = reg0.is_leaf + reg1.is_leaf + reg4;
+    pair_t reg_b;
+    reg_b.id_A = reg2.id;
+    reg_b.id_B = reg3.id;
 
-    // s_intersect_count_directory.write(reg_a);
-    // s_result_pair_directory.write(reg_b);
+    s_intersect_count_directory.write(reg_a);
+    s_result_pair_directory.write(reg_b);
 
-    // s_intersect_count_leaf.write(reg_a);
-    // s_result_pair_leaf.write(reg_b);
+    s_intersect_count_leaf.write(reg_a);
+    s_result_pair_leaf.write(reg_b);
 
-    // ////// debug ends
-
+    ////// debug ends
+#else 
 
     obj_t page_A[MAX_PAGE_ENTRY_NUM];
     obj_t page_B[MAX_PAGE_ENTRY_NUM];
@@ -174,4 +176,5 @@ void join_page(
             }
         }
     }
+#endif
 }

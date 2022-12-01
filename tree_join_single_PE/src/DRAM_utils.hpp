@@ -49,25 +49,26 @@ void read_nodes(
     hls::stream<obj_t>& s_page_B
     ) {
     
-    // ////// debug starts
-    // pair_t reg_p = s_page_ID_pair_read_nodes.read();
-    // node_meta_t reg_n;
-    // obj_t reg_o; 
-    // reg_n.is_leaf = reg_p.id_A;
-    // reg_o.id = reg_p.id_A;
+#ifdef DEBUG_read_nodes
+    ////// debug starts
+    pair_t reg_p = s_page_ID_pair_read_nodes.read();
+    int reg_i = s_join_finish_replicated.read();
+    node_meta_t reg_n;
+    obj_t reg_o; 
+    reg_n.is_leaf = reg_p.id_A + reg_i;
+    reg_o.id = reg_p.id_A;
 
-    // s_meta_A.write(reg_n);
-    // s_meta_B.write(reg_n);
+    s_meta_A.write(reg_n);
+    s_meta_B.write(reg_n);
 
-    // s_page_A.write(reg_o);
-    // s_page_B.write(reg_o);
+    s_page_A.write(reg_o);
+    s_page_B.write(reg_o);
 
-    // ////// debug ends
-
+    ////// debug ends
+#else
 
     while (true) {
 
-        
         if (!s_join_finish_replicated.empty()) {
             int end = s_join_finish_replicated.read();
             break;
@@ -150,6 +151,8 @@ void read_nodes(
             }
         }
     }
+
+#endif
 }
 
 
@@ -168,25 +171,28 @@ void layer_cache_memory_controller(
     hls::stream<int>& s_read_layer_id,      // layer l 
     hls::stream<int>& s_read_layer_pointer, // pair p in layer l
     hls::stream<int>& s_write_layer_id, 
+    hls::stream<int>& s_join_finish_replicated,
     // output
     //   to scheduler
     hls::stream<pair_t>& s_page_pair_scheduler,      // for read request, return pair
     hls::stream<int>& s_intersect_count_directory_scheduler // for write request, return count
 ) {
 
-    // ////// debug starts
+#ifdef DEBUG_layer_cache_memory_controller
+    ////// debug starts
 
-    // s_page_pair_scheduler.write(s_result_pair_directory.read());
+    s_page_pair_scheduler.write(s_result_pair_directory.read());
 
-    // int reg = s_intersect_count_directory.read() + 
-    //     s_read_write_control.read() + 
-    //     s_read_layer_id.read() + 
-    //     s_read_layer_pointer.read() + 
-    //     s_write_layer_id.read();
-    // s_intersect_count_directory_scheduler.write(reg);
+    int reg = s_intersect_count_directory.read() + 
+        s_read_write_control.read() + 
+        s_read_layer_id.read() + 
+        s_read_layer_pointer.read() + 
+        s_write_layer_id.read() + 
+        s_join_finish_replicated.read();
+    s_intersect_count_directory_scheduler.write(reg);
 
-    // ////// debug ends
-
+    ////// debug ends
+#else
 
     // Initialization: write the pair (rootA, rootB) in layer cache 0
     pair_t root_pair;
@@ -206,39 +212,46 @@ void layer_cache_memory_controller(
 
     while (true) {
 
-        // 0 -> read from memory; 1 -> write to memory 
-        int write = s_read_write_control.read();
+        if (!s_join_finish_replicated.empty()) {
+            int end = s_join_finish_replicated.read();
+            break;
+        } else if (!s_read_write_control.empty()) {
 
-        if (write) {
-            int write_layer_id = s_write_layer_id.read();
-            int start_addr = write_layer_id * (LAYER_CACHE_SIZE / 8); 
+            // 0 -> read from memory; 1 -> write to memory 
+            int write = s_read_write_control.read();
 
-            bool reach_end = true; 
-            for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
-#pragma HLS pipeline II=1
-                if (!s_intersect_count_directory.empty() && s_result_pair_directory.empty()) {
+            if (write) {
+                int write_layer_id = s_write_layer_id.read();
+                int start_addr = write_layer_id * (LAYER_CACHE_SIZE / 8); 
+
+                bool reach_end = true; 
+                for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
+    #pragma HLS pipeline II=1
+                    if (!s_intersect_count_directory.empty() && s_result_pair_directory.empty()) {
+                        int count = s_intersect_count_directory.read(); 
+                        s_intersect_count_directory_scheduler.write(count);
+                        reach_end = false;
+                        break;
+                    }
+                    pair_t result = s_result_pair_directory.read();
+                    ap_uint<64> result_ap_uint_64 =pack_pair(result);
+                    layer_cache[start_addr + i] = result_ap_uint_64;
+                }
+                if (reach_end) { // maximum results, haven't read the count yet 
                     int count = s_intersect_count_directory.read(); 
                     s_intersect_count_directory_scheduler.write(count);
-                    reach_end = false;
-                    break;
                 }
-                pair_t result = s_result_pair_directory.read();
-                ap_uint<64> result_ap_uint_64 =pack_pair(result);
-                layer_cache[start_addr + i] = result_ap_uint_64;
-            }
-            if (reach_end) { // maximum results, haven't read the count yet 
-                int count = s_intersect_count_directory.read(); 
-                s_intersect_count_directory_scheduler.write(count);
-            }
-        } else { // read 
-            int read_layer_id = s_read_layer_id.read();
-            int read_layer_pointer = s_read_layer_pointer.read();
-            int addr = read_layer_id * (LAYER_CACHE_SIZE / 8) + read_layer_pointer; 
+            } else { // read 
+                int read_layer_id = s_read_layer_id.read();
+                int read_layer_pointer = s_read_layer_pointer.read();
+                int addr = read_layer_id * (LAYER_CACHE_SIZE / 8) + read_layer_pointer; 
 
-            pair_t next_page_pair = unpack_pair(layer_cache[addr]);
-            s_page_pair_scheduler.write(next_page_pair);
+                pair_t next_page_pair = unpack_pair(layer_cache[addr]);
+                s_page_pair_scheduler.write(next_page_pair);
+            }
         }
     }
+#endif
 }
 
 
@@ -256,27 +269,32 @@ void write_results(
     //                while the rest are intersect ID pairs
     ap_uint<64>* out_intersect) {
 
-    
-    // ////// debug starts
-    // int reg0 = s_intersect_count_leaf.read();
-    // pair_t reg1 = s_result_pair_leaf.read();
-    // int reg2 = s_join_finish_replicated.read();
+#ifdef DEBUG_write_results
+    ////// debug starts
+    int reg0 = s_intersect_count_leaf.read();
+    pair_t reg1 = s_result_pair_leaf.read();
+    int reg2 = s_join_finish_replicated.read();
 
-    // out_intersect[0] = reg0;
-    // out_intersect[1] = reg1.id_A;
-    // out_intersect[2] = reg1.id_B;
-    // out_intersect[3] = reg2;
+    out_intersect[0] = reg0;
+    out_intersect[1] = reg1.id_A;
+    out_intersect[2] = reg1.id_B;
+    out_intersect[3] = reg2;
 
-    // ////// debug ends
-
+    ////// debug ends
+#else 
 
     ap_uint<64> total_intersect_count = 0;
     const int bias = 1; // the first number writes total intersection count, 
     
     while (true) {
 
+        // the entire join is finished
+        if (!s_join_finish_replicated.empty()) {
+            int end = s_join_finish_replicated.read();
+            break;
+        }
         // if data is available, finish writing results of a pair of node join
-        if (!s_result_pair_leaf.empty()) {
+        else if (!s_result_pair_leaf.empty()) {
 
             bool reach_end = true; 
             for (int i = 0; i < MAX_PAGE_ENTRIES * MAX_PAGE_ENTRIES; i++) {
@@ -295,13 +313,9 @@ void write_results(
             }
         } 
         
-        // the entire join is finished
-        if (!s_join_finish_replicated.empty()) {
-            int end = s_join_finish_replicated.read();
-            break;
-        }
     }
 
     // write the number of intersection in the first address
     out_intersect[0] = total_intersect_count;
+#endif
 }

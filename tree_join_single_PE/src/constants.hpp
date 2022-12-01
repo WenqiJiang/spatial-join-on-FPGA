@@ -1,5 +1,11 @@
 #pragma once
 
+// #define DEBUG_read_nodes
+// #define DEBUG_layer_cache_memory_controller
+// #define DEBUG_write_results
+// #define DEBUG_join_page
+// #define DEBUG_scheduler
+
 // 1 -> point/line intersection counts as region intersection
 // 0 -> does not count
 #define POINT_INTERSECT_COUNTS 1 

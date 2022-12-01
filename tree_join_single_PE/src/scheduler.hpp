@@ -22,19 +22,20 @@ void scheduler(
 
 ) {
 
-    // ////// debug starts
-    // s_page_ID_pair_read_nodes.write(s_page_pair_scheduler.read());
+#ifdef DEBUG_scheduler
+    ////// debug starts
+    s_page_ID_pair_read_nodes.write(s_page_pair_scheduler.read());
     
-    // int reg = s_intersect_count_directory_scheduler.read();
+    int reg = s_intersect_count_directory_scheduler.read();
         
-    // s_read_write_control.read(reg);
-    // s_read_layer_id.read(reg);
-    // s_read_layer_pointer.read(reg);
-    // s_write_layer_id.read(reg);
-    // s_join_finish.write(reg);
+    s_read_write_control.read(reg);
+    s_read_layer_id.read(reg);
+    s_read_layer_pointer.read(reg);
+    s_write_layer_id.read(reg);
+    s_join_finish.write(reg);
 
-    // ////// debug ends
-
+    ////// debug ends
+#else
 
     int num_pairs_per_level[MAX_TREE_LEVEL] = {0};
     int current_pointer_per_level[MAX_TREE_LEVEL] = {0};
@@ -102,6 +103,7 @@ void scheduler(
             }
         }
     }
+#endif
 }
 
 template<int num_stream>

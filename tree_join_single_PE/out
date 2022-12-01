@@ -1,45 +1,48 @@
+g++ -g -std=c++11 -I/home/wejiang/opt/xilinx/xrt/include -o host src/host.cpp -L/home/wejiang/opt/xilinx/xrt/lib -lxilinxopencl -pthread -lrt
+Compiled Host Executable: host
 mkdir -p ./xclbin
 v++ -g -t hw --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config connectivity.cfg -c -k vadd --temp_dir ./_x.hw -o xclbin/vadd.hw.xo src/vadd.cpp
-Option Map File Used: '/tools/Xilinx/Vitis/2022.2/data/vitis/vpp/optMap.xml'
+Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
 INFO: [v++ 82-4274] Default memory will be used for trace offload
 
-****** v++ v2022.2 (64-bit)
-  **** SW Build 3671529 on 2022-10-13-17:52:11
+****** v++ v2022.1 (64-bit)
+  **** SW Build 3524075 on 2022-04-13-17:42:45
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 
 INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
 	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/vadd.hw
 	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/logs/vadd.hw
-Running Dispatch Server on port: 38405
-INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo.compile_summary, at Wed Nov 30 18:38:36 2022
-INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/vadd.hw/v++_compile_vadd.hw_guidance.html', at Wed Nov 30 18:38:36 2022
+Running Dispatch Server on port: 41395
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo.compile_summary, at Thu Dec  1 08:55:36 2022
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Thu Dec  1 08:55:36 2022
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/vadd.hw/v++_compile_vadd.hw_guidance.html', at Thu Dec  1 08:55:38 2022
 INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
-INFO: [v++ 74-78] Compiler Version string: 2022.2
+INFO: [v++ 74-78] Compiler Version string: 2022.1
 INFO: [v++ 60-585] Compiling for hardware target
 INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
 INFO: [v++ 60-242] Creating kernel: 'vadd'
 INFO: [v++ 60-1616] Creating a HLS clock using kernel_frequency option: 140 MHz
 
 ===>The following messages were generated while  performing high-level synthesis for kernel: vadd Log file: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/vadd.hw/vadd/vitis_hls.log :
-INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_98_2'.
-INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 3, Depth = 5, loop 'VITIS_LOOP_98_2'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_99_2'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 3, Depth = 5, loop 'VITIS_LOOP_99_2'
 INFO: [v++ 204-61] Pipelining loop 'Loop 1'.
 INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'Loop 1'
 INFO: [v++ 204-61] Pipelining loop 'Loop 1'.
 INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'Loop 1'
-INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_47_1'.
-INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 4, Depth = 4, loop 'VITIS_LOOP_47_1'
-INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_217_2'.
-INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 71, loop 'VITIS_LOOP_217_2'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_48_1'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 4, Depth = 4, loop 'VITIS_LOOP_48_1'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_228_2'.
+INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 71, loop 'VITIS_LOOP_228_2'
 INFO: [v++ 204-61] Pipelining loop 'LOAD_PAGE'.
 INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'LOAD_PAGE'
 INFO: [v++ 204-61] Pipelining loop 'LOOP_C'.
 INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 4, loop 'LOOP_C'
 INFO: [v++ 204-61] Pipelining loop 'LOOP_A_LOOP_B'.
 INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 5, loop 'LOOP_A_LOOP_B'
-INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_282_2'.
-INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 71, loop 'VITIS_LOOP_282_2'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_300_2'.
+INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 71, loop 'VITIS_LOOP_300_2'
 INFO: [v++ 200-790] **** Loop Constraint Status: All loop constraints were NOT satisfied.
 INFO: [v++ 200-789] **** Estimated Fmax: 191.78 MHz
 INFO: [v++ 60-594] Finished kernel compilation
@@ -48,241 +51,35 @@ INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial
 INFO: [v++ 60-586] Created xclbin/vadd.hw.xo
 INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
     vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo.compile_summary 
-INFO: [v++ 60-791] Total elapsed time: 0h 1m 23s
+INFO: [v++ 60-791] Total elapsed time: 0h 1m 24s
 INFO: [v++ 60-1653] Closing dispatch client.
 mkdir -p ./xclbin
 v++ -g -t hw --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config connectivity.cfg -l --temp_dir ./_x.hw -o xclbin/vadd.hw.xclbin xclbin/vadd.hw.xo # 
-Option Map File Used: '/tools/Xilinx/Vitis/2022.2/data/vitis/vpp/optMap.xml'
+Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
 INFO: [v++ 82-4274] Default memory will be used for trace offload
 
-****** v++ v2022.2 (64-bit)
-  **** SW Build 3671529 on 2022-10-13-17:52:11
+****** v++ v2022.1 (64-bit)
+  **** SW Build 3524075 on 2022-04-13-17:42:45
     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
 
 INFO: [v++ 60-1306] Additional information associated with this v++ link can be found at:
 	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/link
 	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/logs/link
-Running Dispatch Server on port: 37683
-INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xclbin.link_summary, at Wed Nov 30 18:40:01 2022
-INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/link/v++_link_vadd.hw_guidance.html', at Wed Nov 30 18:40:02 2022
+Running Dispatch Server on port: 39629
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xclbin.link_summary, at Thu Dec  1 08:57:02 2022
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Thu Dec  1 08:57:02 2022
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/link/v++_link_vadd.hw_guidance.html', at Thu Dec  1 08:57:04 2022
 INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
-INFO: [v++ 74-78] Compiler Version string: 2022.2
+INFO: [v++ 74-78] Compiler Version string: 2022.1
 INFO: [v++ 82-4274] Default memory will be used for trace offload
 INFO: [v++ 60-629] Linking for hardware target
 INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
 INFO: [v++ 60-1332] Run 'run_link' status: Not started
-INFO: [v++ 60-1443] [18:40:06] Run run_link: Step system_link: Started
-INFO: [v++ 60-1453] Command Line: system_link --xo /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo -keep -memory-for-trace DDR[0] --config /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/syslinkConfig.ini --xpfm /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm --target hw --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link
+INFO: [v++ 60-1443] [08:57:09] Run run_link: Step system_link: Started
+INFO: [v++ 60-1453] Command Line: system_link --xo /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo -keep --config /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/syslinkConfig.ini --xpfm /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm --target hw --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/run_link
+INFO: [SYSTEM_LINK 60-1316] Initiating connection to rulecheck server, at Thu Dec  1 08:57:11 2022
 INFO: [SYSTEM_LINK 82-70] Extracting xo v3 file /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/xclbin/vadd.hw.xo
 INFO: [SYSTEM_LINK 82-53] Creating IP database /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml
-INFO: [SYSTEM_LINK 82-38] [18:40:09] build_xd_ip_db started: /tools/Xilinx/Vitis/2022.2/bin/build_xd_ip_db -ip_search 0  -sds-pf /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/hw.hpfm -clkid 0 -ip /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/iprepo/xilinx_com_hls_vadd_1_0,vadd -o /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml
-INFO: [SYSTEM_LINK 82-37] [18:40:17] build_xd_ip_db finished successfully
-Time (s): cpu = 00:00:07 ; elapsed = 00:00:08 . Memory (MB): peak = 429.793 ; gain = 0.000 ; free physical = 155113 ; free virtual = 252218
-INFO: [SYSTEM_LINK 82-51] Create system connectivity graph
-INFO: [SYSTEM_LINK 82-102] Applying explicit connections to the system connectivity graph: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/cfgraph/cfgen_cfgraph.xml
-INFO: [SYSTEM_LINK 82-38] [18:40:17] cfgen started: /tools/Xilinx/Vitis/2022.2/bin/cfgen  -nk vadd:1:vadd_1 -sp vadd_1.in_pages_A:DDR[0] -sp vadd_1.in_pages_B:DDR[1] -sp vadd_1.layer_cache:DDR[2] -sp vadd_1.out_intersect:DDR[3] -dpa_mem_offload true -dmclkid 0 -r /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml -o /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/cfgraph/cfgen_cfgraph.xml
-INFO: [CFGEN 83-0] Kernel Specs: 
-INFO: [CFGEN 83-0]   kernel: vadd, num: 1  {vadd_1}
-INFO: [CFGEN 83-0] Port Specs: 
-INFO: [CFGEN 83-0]   kernel: vadd_1, k_port: in_pages_A, sptag: DDR[0]
-INFO: [CFGEN 83-0]   kernel: vadd_1, k_port: in_pages_B, sptag: DDR[1]
-INFO: [CFGEN 83-0]   kernel: vadd_1, k_port: layer_cache, sptag: DDR[2]
-INFO: [CFGEN 83-0]   kernel: vadd_1, k_port: out_intersect, sptag: DDR[3]
-INFO: [SYSTEM_LINK 82-37] [18:40:23] cfgen finished successfully
-Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 429.793 ; gain = 0.000 ; free physical = 154502 ; free virtual = 251607
-INFO: [SYSTEM_LINK 82-52] Create top-level block diagram
-INFO: [SYSTEM_LINK 82-38] [18:40:23] cf2bd started: /tools/Xilinx/Vitis/2022.2/bin/cf2bd  --linux --trace_buffer 1024 --input_file /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/cfgraph/cfgen_cfgraph.xml --ip_db /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml --cf_name dr --working_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.xsd --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int --target_bd ulp.bd
-INFO: [CF2BD 82-31] Launching cf2xd: cf2xd -linux -trace-buffer 1024 -i /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/cfgraph/cfgen_cfgraph.xml -r /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml -o dr.xml
-INFO: [CF2BD 82-28] cf2xd finished successfully
-INFO: [CF2BD 82-31] Launching cf_xsd: cf_xsd -disable-address-gen -bd ulp.bd -dn dr -dp /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.xsd
-INFO: [CF2BD 82-28] cf_xsd finished successfully
-INFO: [SYSTEM_LINK 82-37] [18:40:27] cf2bd finished successfully
-Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 429.793 ; gain = 0.000 ; free physical = 153180 ; free virtual = 250266
-INFO: [v++ 60-1441] [18:40:27] Run run_link: Step system_link: Completed
-Time (s): cpu = 00:00:19 ; elapsed = 00:00:21 . Memory (MB): peak = 437.199 ; gain = 0.000 ; free physical = 153237 ; free virtual = 250323
-INFO: [v++ 60-1443] [18:40:27] Run run_link: Step cf2sw: Started
-INFO: [v++ 60-1453] Command Line: cf2sw -sdsl /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/sdsl.dat -rtd /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/cf2sw.rtd -nofilter /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/cf2sw_full.rtd -xclbin /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/xclbin_orig.xml -o /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/xclbin_orig.1.xml
-INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/run_link
-INFO: [v++ 60-1441] [18:40:32] Run run_link: Step cf2sw: Completed
-Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 437.199 ; gain = 0.000 ; free physical = 155026 ; free virtual = 252112
-INFO: [v++ 60-1443] [18:40:32] Run run_link: Step rtd2_system_diagram: Started
-INFO: [v++ 60-1453] Command Line: rtd2SystemDiagram
-INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/run_link
-INFO: [v++ 60-1441] [18:40:32] Run run_link: Step rtd2_system_diagram: Completed
-Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.38 . Memory (MB): peak = 437.199 ; gain = 0.000 ; free physical = 155032 ; free virtual = 252118
-INFO: [v++ 60-1443] [18:40:32] Run run_link: Step vpl: Started
-INFO: [v++ 60-1453] Command Line: vpl -t hw -f xilinx_u250_gen3x16_xdma_4_1_202210_1 -s -g --kernel_frequency 140 --remote_ip_cache /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/.ipcache --trace_memory DDR[0] --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int --log_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/logs/link --report_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/reports/link --config /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/vplConfig.ini -k /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/kernel_info.dat --webtalk_flag Vitis --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link --no-info --iprepo /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/xo/ip_repo/xilinx_com_hls_vadd_1_0 --messageDb /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/run_link/vpl.pb /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/dr.bd.tcl
-INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/run_link
-
-****** vpl v2022.2 (64-bit)
-  **** SW Build 3671529 on 2022-10-13-17:52:11
-    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
-
-INFO: [VPL 60-839] Read in kernel information from file '/pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/int/kernel_info.dat'.
-INFO: [VPL 74-78] Compiler Version string: 2022.2
-INFO: [VPL 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
-INFO: [VPL 60-1032] Extracting hardware platform to /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/vivado/vpl/.local/hw_platform
-[18:40:50] Run vpl: Step create_project: Started
-Creating Vivado project.
-[18:40:56] Run vpl: Step create_project: Completed
-[18:40:56] Run vpl: Step create_bd: Started
-[18:41:33] Run vpl: Step create_bd: Completed
-[18:41:33] Run vpl: Step update_bd: Started
-WARNING: [VPL-1] The use of profile options turned on trace, which uses a memory resource in one SLR; however kernels or compute units could potentially be located in multiple SLRs. This may impact timing due to SLR crossing. To improve timing, please consider implementing trace memory in every SLRs used via the linker option: --profile.trace_memory <memory>:<SLR>. SLRs present on the design : SLR0 SLR1 SLR2 SLR3
-[18:41:38] Run vpl: Step update_bd: Completed
-[18:41:38] Run vpl: Step generate_target: Started
-[18:42:55] Run vpl: Step generate_target: RUNNING...
-[18:44:15] Run vpl: Step generate_target: RUNNING...
-[18:44:54] Run vpl: Step generate_target: Completed
-[18:44:54] Run vpl: Step config_hw_runs: Started
-[18:46:20] Run vpl: Step config_hw_runs: RUNNING...
-[18:47:45] Run vpl: Step config_hw_runs: RUNNING...
-[18:48:41] Run vpl: Step config_hw_runs: Completed
-[18:48:41] Run vpl: Step synth: Started
-[18:49:49] Block-level synthesis in progress, 0 of 234 jobs complete, 8 jobs running.
-[18:50:23] Block-level synthesis in progress, 0 of 234 jobs complete, 8 jobs running.
-[18:50:57] Block-level synthesis in progress, 7 of 234 jobs complete, 7 jobs running.
-[18:51:30] Block-level synthesis in progress, 8 of 234 jobs complete, 8 jobs running.
-[18:52:04] Block-level synthesis in progress, 15 of 234 jobs complete, 3 jobs running.
-[18:52:37] Block-level synthesis in progress, 17 of 234 jobs complete, 8 jobs running.
-[18:53:11] Block-level synthesis in progress, 22 of 234 jobs complete, 5 jobs running.
-[18:53:44] Block-level synthesis in progress, 31 of 234 jobs complete, 4 jobs running.
-[18:54:18] Block-level synthesis in progress, 37 of 234 jobs complete, 6 jobs running.
-[18:54:51] Block-level synthesis in progress, 41 of 234 jobs complete, 6 jobs running.
-[18:55:26] Block-level synthesis in progress, 48 of 234 jobs complete, 3 jobs running.
-[18:55:59] Block-level synthesis in progress, 52 of 234 jobs complete, 7 jobs running.
-[18:56:33] Block-level synthesis in progress, 54 of 234 jobs complete, 7 jobs running.
-[18:57:07] Block-level synthesis in progress, 61 of 234 jobs complete, 6 jobs running.
-[18:57:41] Block-level synthesis in progress, 66 of 234 jobs complete, 6 jobs running.
-[18:58:15] Block-level synthesis in progress, 71 of 234 jobs complete, 6 jobs running.
-[18:58:49] Block-level synthesis in progress, 75 of 234 jobs complete, 6 jobs running.
-[18:59:23] Block-level synthesis in progress, 83 of 234 jobs complete, 3 jobs running.
-[18:59:57] Block-level synthesis in progress, 90 of 234 jobs complete, 5 jobs running.
-[19:00:31] Block-level synthesis in progress, 96 of 234 jobs complete, 5 jobs running.
-[19:01:05] Block-level synthesis in progress, 101 of 234 jobs complete, 7 jobs running.
-[19:01:39] Block-level synthesis in progress, 108 of 234 jobs complete, 3 jobs running.
-[19:02:13] Block-level synthesis in progress, 111 of 234 jobs complete, 7 jobs running.
-[19:02:47] Block-level synthesis in progress, 116 of 234 jobs complete, 6 jobs running.
-[19:03:21] Block-level synthesis in progress, 124 of 234 jobs complete, 4 jobs running.
-[19:03:55] Block-level synthesis in progress, 129 of 234 jobs complete, 6 jobs running.
-[19:04:30] Block-level synthesis in progress, 137 of 234 jobs complete, 4 jobs running.
-[19:05:04] Block-level synthesis in progress, 142 of 234 jobs complete, 7 jobs running.
-[19:05:38] Block-level synthesis in progress, 144 of 234 jobs complete, 7 jobs running.
-[19:06:12] Block-level synthesis in progress, 151 of 234 jobs complete, 6 jobs running.
-[19:06:46] Block-level synthesis in progress, 152 of 234 jobs complete, 8 jobs running.
-[19:07:21] Block-level synthesis in progress, 157 of 234 jobs complete, 5 jobs running.
-[19:07:55] Block-level synthesis in progress, 160 of 234 jobs complete, 8 jobs running.
-[19:08:30] Block-level synthesis in progress, 161 of 234 jobs complete, 7 jobs running.
-[19:09:04] Block-level synthesis in progress, 166 of 234 jobs complete, 8 jobs running.
-[19:09:39] Block-level synthesis in progress, 168 of 234 jobs complete, 7 jobs running.
-[19:10:14] Block-level synthesis in progress, 174 of 234 jobs complete, 6 jobs running.
-[19:10:49] Block-level synthesis in progress, 178 of 234 jobs complete, 7 jobs running.
-[19:11:23] Block-level synthesis in progress, 183 of 234 jobs complete, 6 jobs running.
-[19:11:58] Block-level synthesis in progress, 188 of 234 jobs complete, 6 jobs running.
-[19:12:33] Block-level synthesis in progress, 190 of 234 jobs complete, 7 jobs running.
-[19:13:07] Block-level synthesis in progress, 195 of 234 jobs complete, 6 jobs running.
-[19:13:42] Block-level synthesis in progress, 196 of 234 jobs complete, 7 jobs running.
-[19:14:17] Block-level synthesis in progress, 202 of 234 jobs complete, 6 jobs running.
-[19:14:48] Block-level synthesis in progress, 202 of 234 jobs complete, 8 jobs running.
-[19:15:25] Block-level synthesis in progress, 208 of 234 jobs complete, 5 jobs running.
-[19:15:58] Block-level synthesis in progress, 210 of 234 jobs complete, 8 jobs running.
-[19:16:34] Block-level synthesis in progress, 213 of 234 jobs complete, 6 jobs running.
-[19:17:08] Block-level synthesis in progress, 217 of 234 jobs complete, 6 jobs running.
-[19:17:43] Block-level synthesis in progress, 222 of 234 jobs complete, 5 jobs running.
-[19:18:18] Block-level synthesis in progress, 228 of 234 jobs complete, 6 jobs running.
-[19:18:53] Block-level synthesis in progress, 231 of 234 jobs complete, 3 jobs running.
-[19:19:28] Block-level synthesis in progress, 233 of 234 jobs complete, 1 job running.
-[19:20:03] Block-level synthesis in progress, 234 of 234 jobs complete, 0 jobs running.
-[19:20:38] Top-level synthesis in progress.
-[19:21:11] Top-level synthesis in progress.
-[19:21:47] Top-level synthesis in progress.
-[19:22:18] Run vpl: Step synth: Completed
-[19:22:18] Run vpl: Step impl: Started
-[19:34:01] Finished 2nd of 6 tasks (FPGA linking synthesized kernels to platform). Elapsed time: 00h 53m 27s 
-
-[19:34:01] Starting logic optimization..
-[19:34:35] Phase 1 Generate And Synthesize MIG Cores
-[19:44:00] Phase 2 Generate And Synthesize Debug Cores
-[19:47:31] Phase 3 Retarget
-[19:47:31] Phase 4 Constant propagation
-[19:48:07] Phase 5 Sweep
-[19:48:41] Phase 6 BUFG optimization
-[19:48:41] Phase 7 Shift Register Optimization
-[19:49:17] Phase 8 Post Processing Netlist
-[19:50:28] Finished 3rd of 6 tasks (FPGA logic optimization). Elapsed time: 00h 16m 26s 
-
-[19:50:28] Starting logic placement..
-[19:51:02] Phase 1 Placer Initialization
-[19:51:02] Phase 1.1 Placer Initialization Netlist Sorting
-[19:56:20] Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device
-[19:58:05] Phase 1.3 Build Placer Netlist Model
-[20:01:02] Phase 1.4 Constrain Clocks/Macros
-[20:01:36] Phase 2 Global Placement
-[20:01:36] Phase 2.1 Floorplanning
-[20:02:46] Phase 2.1.1 Partition Driven Placement
-[20:02:46] Phase 2.1.1.1 PBP: Partition Driven Placement
-[20:03:56] Phase 2.1.1.2 PBP: Clock Region Placement
-[20:07:28] Phase 2.1.1.3 PBP: Discrete Incremental
-[20:07:28] Phase 2.1.1.4 PBP: Compute Congestion
-[20:08:04] Phase 2.1.1.5 PBP: Macro Placement
-[20:08:04] Phase 2.1.1.6 PBP: UpdateTiming
-[20:08:39] Phase 2.1.1.7 PBP: Add part constraints
-[20:08:39] Phase 2.2 Physical Synthesis After Floorplan
-[20:09:15] Phase 2.3 Update Timing before SLR Path Opt
-[20:09:15] Phase 2.4 Post-Processing in Floorplanning
-[20:09:15] Phase 2.5 Global Placement Core
-[20:17:30] Phase 2.5.1 UpdateTiming Before Physical Synthesis
-[20:17:30] Phase 2.5.2 Physical Synthesis In Placer
-[20:22:48] Phase 3 Detail Placement
-[20:22:48] Phase 3.1 Commit Multi Column Macros
-[20:22:48] Phase 3.2 Commit Most Macros & LUTRAMs
-[20:26:21] Phase 3.3 Small Shape DP
-[20:26:21] Phase 3.3.1 Small Shape Clustering
-[20:26:58] Phase 3.3.2 Flow Legalize Slice Clusters
-[20:26:58] Phase 3.3.3 Slice Area Swap
-[20:26:58] Phase 3.3.3.1 Slice Area Swap Initial
-[20:29:23] Phase 3.4 Place Remaining
-[20:29:23] Phase 3.5 Re-assign LUT pins
-[20:31:09] Phase 3.6 Pipeline Register Optimization
-[20:31:09] Phase 3.7 Fast Optimization
-[20:32:20] Phase 4 Post Placement Optimization and Clean-Up
-[20:32:20] Phase 4.1 Post Commit Optimization
-[20:34:07] Phase 4.1.1 Post Placement Optimization
-[20:34:07] Phase 4.1.1.1 BUFG Insertion
-[20:34:07] Phase 1 Physical Synthesis Initialization
-[20:34:41] Phase 4.1.1.2 BUFG Replication
-[20:35:17] Phase 4.1.1.3 Post Placement Timing Optimization
-[20:35:17] Phase 4.1.1.4 Replication
-[20:37:04] Phase 4.2 Post Placement Cleanup
-[20:37:04] Phase 4.3 Placer Reporting
-[20:37:04] Phase 4.3.1 Print Estimated Congestion
-[20:37:40] Phase 4.4 Final Placement Cleanup
-[20:40:36] Finished 4th of 6 tasks (FPGA logic placement). Elapsed time: 00h 50m 07s 
-
-[20:40:36] Starting logic routing..
-[20:41:46] Phase 1 Build RT Design
-[20:44:44] Phase 2 Router Initialization
-[20:44:44] Phase 2.1 Fix Topology Constraints
-[20:44:44] Phase 2.2 Pre Route Cleanup
-[20:45:18] Phase 2.3 Global Clock Net Routing
-[20:45:55] Phase 2.4 Update Timing
-[20:47:40] Phase 2.5 Update Timing for Bus Skew
-[20:47:40] Phase 2.5.1 Update Timing
-[20:48:50] Phase 3 Initial Routing
-[20:48:50] Phase 3.1 Global Routing
-[20:51:12] Phase 4 Initial Routing Verification
-[20:51:48] Phase 5 Rip-up And Reroute
-[20:51:48] Phase 5.1 Global Iteration 0
-[21:00:37] Phase 5.2 Global Iteration 1
-[21:02:23] Phase 6 Delay and Skew Optimization
-[21:02:23] Phase 6.1 Delay CleanUp
-[21:02:23] Phase 6.1.1 Update Timing
-[21:02:57] Phase 6.1.2 Update Timing
-[21:04:08] Phase 6.2 Clock Skew Optimization
-[21:04:43] Phase 7 Post Hold Fix
-[21:04:43] Phase 7.1 Hold Fix Iter
-[21:04:43] Phase 7.1.1 Update Timing
-[21:05:54] Phase 8 Route finalize
-[21:05:54] Phase 9 Verifying routed nets
+INFO: [SYSTEM_LINK 82-38] [08:57:13] build_xd_ip_db started: /tools/Xilinx/Vitis/2022.1/bin/build_xd_ip_db -ip_search 0  -sds-pf /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/hw.hpfm -clkid 0 -ip /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/iprepo/xilinx_com_hls_vadd_1_0,vadd -o /pub/scratch/wenqi/spatial-join-on-FPGA/tree_join_single_PE/_x.hw/link/sys_link/_sysl/.cdb/xd_ip_db.xml
