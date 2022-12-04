@@ -1,31 +1,35 @@
-#include "constants.hpp"
-#include "DRAM_utils.hpp"
-#include "join_PE.hpp"
-#include "scheduler.hpp"
-#include "types.hpp"
+// #include "constants.hpp"
+// #include "DRAM_utils.hpp"
+// #include "join_PE.hpp"
+// #include "scheduler.hpp"
+// #include "types.hpp"
+
+#include <hls_stream.h>
 
 void PE_A(
     // in
     hls::stream<int>& s_C_to_A,
     // out
     hls::stream<int>& s_A_to_B,
-    ap_uint<64>* out_intersect) {
+    int* out_intersect) {
 
     // PE A starts the loop
     s_A_to_B.write(1);
 
     // End by 
+    // while (s_C_to_A.empty()) {}
     int out = s_C_to_A.read();
     out_intersect[0] = out;
 }
 
 void PE_B(
     // in
-    ap_uint<64>* layer_cache,
+    int* layer_cache,
     hls::stream<int>& s_A_to_B,
     // out
     hls::stream<int>& s_B_to_C) {
 
+    // while (s_A_to_B.empty()) {}
     int in = s_A_to_B.read();
     int out = layer_cache[in];
 
@@ -38,33 +42,35 @@ void PE_C(
     // out
     hls::stream<int>& s_C_to_A) {
 
-    s_C_to_A.write(s_B_to_C.read());
+    // while (s_B_to_C.empty()) {}
+    int out = s_B_to_C.read();
+    s_C_to_A.write(out);
 }
 
 
 extern "C" {
 
 void vadd(  
-    int max_level_A,
-    int max_level_B,
-    int root_id_A,
-    int root_id_B,
-    // in runtime (should from DRAM)
-    const ap_uint<512>* in_pages_A,
-    const ap_uint<512>* in_pages_B,
+    // int max_level_A,
+    // int max_level_B,
+    // int root_id_A,
+    // int root_id_B,
+    // // in runtime (should from DRAM)
+    // const ap_uint<512>* in_pages_A,
+    // const ap_uint<512>* in_pages_B,
     // out (intermediate)
-    ap_uint<64>* layer_cache,
+    int* layer_cache,
     // out (result) format: the first number writes total intersection count, 
     //   while the rest are intersect ID pairs
-    ap_uint<64>* out_intersect 
+    int* out_intersect 
     )
 {
 // Share the same AXI interface with several control signals (but they are not allowed in same dataflow)
 //    https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Controlling-AXI4-Burst-Behavior
 
 // in runtime (should from DRAM)
-#pragma HLS INTERFACE m_axi port=in_pages_A offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=in_pages_B offset=slave bundle=gmem1
+// #pragma HLS INTERFACE m_axi port=in_pages_A offset=slave bundle=gmem0
+// #pragma HLS INTERFACE m_axi port=in_pages_B offset=slave bundle=gmem1
 
 // out
 #pragma HLS INTERFACE m_axi port=layer_cache  offset=slave bundle=gmem2
