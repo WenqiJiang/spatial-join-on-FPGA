@@ -1,0 +1,36 @@
+mkdir -p ./xclbin
+v++ -g -t hw --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps  --config kernel_0.cfg -c -k PE_A --temp_dir ./_x.hw -o xclbin/PE_A.hw.xo src/vadd.cpp
+Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
+INFO: [v++ 82-4274] Default memory will be used for trace offload
+
+****** v++ v2022.1 (64-bit)
+  **** SW Build 3524075 on 2022-04-13-17:42:45
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
+	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/reports/PE_A.hw
+	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/logs/PE_A.hw
+Running Dispatch Server on port: 38783
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/xclbin/PE_A.hw.xo.compile_summary, at Fri Dec  2 17:06:23 2022
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Fri Dec  2 17:06:23 2022
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/reports/PE_A.hw/v++_compile_PE_A.hw_guidance.html', at Fri Dec  2 17:06:25 2022
+INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
+INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
+INFO: [v++ 74-78] Compiler Version string: 2022.1
+INFO: [v++ 60-585] Compiling for hardware target
+INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
+INFO: [v++ 60-242] Creating kernel: 'PE_A'
+INFO: [v++ 60-1616] Creating a HLS clock using kernel_frequency option: 140 MHz
+
+===>The following messages were generated while  performing high-level synthesis for kernel: PE_A Log file: /pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/PE_A.hw/PE_A/vitis_hls.log :
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_27_1'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_27_1'
+INFO: [v++ 200-790] **** Loop Constraint Status: All loop constraints were satisfied.
+INFO: [v++ 200-789] **** Estimated Fmax: 191.78 MHz
+ERROR: [v++ 200-1929] Cannot export XO, found 'ap_fifo' top level interface on argument 's_B_to_A' that is not supported by the XO format.
+ERROR: [v++ 60-300] Failed to build kernel(ip) PE_A, see log for details: /pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/PE_A.hw/PE_A/vitis_hls.log
+ERROR: [v++ 60-773] In '/pub/scratch/wenqi/spatial-join-on-FPGA/multi_kernel_trial_3/_x.hw/PE_A.hw/PE_A/vitis_hls.log', caught Tcl error: ERROR: [HLS 200-1929] Cannot export XO, found 'ap_fifo' top level interface on argument 's_B_to_A' that is not supported by the XO format.
+ERROR: [v++ 60-599] Kernel compilation failed to complete
+ERROR: [v++ 60-592] Failed to finish compilation
+INFO: [v++ 60-1653] Closing dispatch client.
+make: *** [Makefile:75: xclbin/PE_A.hw.xo] Error 1
