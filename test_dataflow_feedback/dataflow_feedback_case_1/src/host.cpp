@@ -42,6 +42,8 @@ int main(int argc, char** argv)
     std::cout << "layer_cache_bytes: " << layer_cache_bytes << std::endl;
     std::vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t));
 
+    layer_cache[1] = 999;
+
     // size_t out_bytes = 10 * 1024 * 1024;
     size_t out_bytes = 4 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
     std::cout << "out_bytes: " << out_bytes << std::endl;
@@ -116,12 +118,12 @@ int main(int argc, char** argv)
 
     int arg_counter = 0;    
     // in 
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_A)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_B)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_A)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_B)));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_B));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_A)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(max_level_B)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_A)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, int(root_id_B)));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_A));
+    // OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_in_pages_B));
 
     // in & out
     OCL_CHECK(err, err = krnl_vector_add.setArg(arg_counter++, buffer_layer_cache));

@@ -65,7 +65,7 @@ No empty check.
 Failed (stuck).
 
 
-### multi_kernel_trial_12
+### multi_kernel_trial_2
 
 Simple AXI feedback operation between 2 PEs. 
 
@@ -149,6 +149,104 @@ Has FIFO depth.
 Has empty check (first iteration).
 
 Succeed
+
+However, sometimes this message will ocur. The wierd thing is that, if I run this bitstream directly, it will complain about the message. If I run trial 5 (another successful version) and then trail 8, everthing works fine. 
+ 
+```
+[XRT] ERROR: unable to sync BO: Invalid argument
+Duration (including memcpy out): 0.003 sec
+First element of output: 0
+TEST FINISHED (NO RESULT CHECK)
+terminate called after throwing an instance of 'xrt_xocl::error'
+  what():  event 5 never submitted
+Aborted
+```
+
+Another wierd trace from summary.csv: The number of transfers is only 1, while the actual number of transfer should be 100.
+
+```
+Compute Unit Utilization
+Device,Compute Unit,Kernel,Global Work Size,Local Work Size,Number Of Calls,Dataflow Execution,Max Overlapping Executions,Dataflow Acceleration,Total Time (ms),Minimum Time (ms),Average Time (ms),Maximum Time (ms),Clock Frequency (MHz),
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PE_A_1,PE_A,1:1:1,1:1:1,1,Yes,1,1.000000x,0.221693,0.221697,0.221693,0.221697,300,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PE_B_1,PE_B,1:1:1,1:1:1,1,Yes,1,1.000000x,0.0305167,0.03052,0.0305167,0.03052,300,
+
+Data Transfer: Streams
+Device,Master Port,Master Kernel Arguments,Slave Port,Slave Kernel Arguments,Number Of Transfers,Transfer Rate (MB/s),Average Size (KB),Link Utilization (%),Link Starve (%),Link Stall (%),
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PE_A_1/s_A_to_B,s_A_to_B,PIPE,PIPE,1,0.0193374,0.4,0.00161145,99.9984,0,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PIPE,PIPE,PE_A_1/s_B_to_A,s_B_to_A,1,0.0195118,0.4,0.00162598,99.9984,0,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PIPE,PIPE,PE_B_1/s_A_to_B,s_A_to_B,1,0.0193219,0.4,0.00161016,99.9984,0,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,PE_B_1/s_B_to_A,s_B_to_A,PIPE,PIPE,1,0.019496,0.4,0.00162467,99.9984,0,
+```
+
+### multi_kernel_trial_9
+
+Simple AXI feedback operation between 2 PEs. 
+
+With a loop.
+
+Using AXIS data type.
+
+Has FIFO depth. 
+
+Passing a start signal (a different signal to data signal) to each other, rather than checking data empty.
+
+Failed -> (compare to experiment 8) this means that the PE itself starts does not count. The first data packet must arrive...
+
+### multi_kernel_trial_9.5
+
+Same as 9, except that we use the start signal in the loop to make sure the variable is not optimized away
+
+Failed (stuck). -> volatile and dependency isn't an issue. 
+### multi_kernel_trial_10
+
+Simple AXI feedback operation between 2 PEs. 
+
+With a loop.
+
+Using AXIS data type.
+
+Has FIFO depth. 
+
+Passing start signals for all the FIFOs at the very beginning, rather than checking data empty.
+
+### multi_kernel_trial_10.5
+
+Same as 10, except that we use the start signal in the loop to make sure the variable is not optimized away
+
+Failed (stuck). -> volatile and dependency isn't an issue. 
+
+### multi_kernel_trial_11
+
+Simple AXI feedback operation between 2 PEs. 
+
+With a loop.
+
+Using AXIS data type.
+
+Has FIFO depth. 
+
+For each read operation, check data empty.
+
+Succeed! 
+
+Performance: 290 ms for 1M iterations. Each iteration has 2 DRAM access (one read and one write), ~200 ns -> 200 ns * 1M ~= 200 ms. We need another program to test the while loop check consumption itself.
+
+
+### multi_kernel_trial_12
+
+Simple AXI feedback operation between 2 PEs. Only 1 read and 1 write operation in total, for performance test purpose.
+
+With a loop.
+
+Using AXIS data type.
+
+Has FIFO depth. 
+
+For each read operation, check data empty.
+
+Succeed.
+
+Performance: 36.6693 ms for 1 million iteration @300 MHz -> ~12 cycles per round. 1 Round = PE A write + PE B block read + PE B write + PE A block read. 4 operations in 12 cycles in reasonable, especially when we don't know AXIS latency can reach 1 cycle. 
 
 ### multi_kernel_trial_single_direction_3
 

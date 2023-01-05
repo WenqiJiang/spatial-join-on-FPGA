@@ -20,15 +20,15 @@ int main(int argc, char** argv)
 
     std::cout << "Allocating memory...\n";
 
-    int iter = 100;
+    int iter = 1000 * 1000;
 
     size_t bytes_input = iter * sizeof(int);
-    std::vector<int ,aligned_allocator<int>> input(bytes_input / sizeof(int));
+    std::vector<int ,aligned_allocator<int>> input(bytes_input / sizeof(int), 0);
 
     size_t bytes_output = 1024; // no more than 16 GB
-    std::vector<int ,aligned_allocator<int>> output(bytes_output / sizeof(int));
+    std::vector<int ,aligned_allocator<int>> output(bytes_output / sizeof(int), 0);
 
-    input[0] = 999;
+    input[0] = 0;
 
 // OPENCL HOST CODE AREA START
 

@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     std::cout << "Allocating memory...\n";
 
-    int iter = 100;
+    int iter = 10;
 
     size_t bytes_input = iter * sizeof(int);
     std::vector<int ,aligned_allocator<int>> input(bytes_input / sizeof(int));

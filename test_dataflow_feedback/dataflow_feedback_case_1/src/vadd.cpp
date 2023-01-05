@@ -6,6 +6,8 @@
 
 #include <hls_stream.h>
 
+#define EMPTY_CHECK 1
+
 void PE_A(
     // in
     hls::stream<int>& s_C_to_A,
@@ -17,9 +19,11 @@ void PE_A(
     s_A_to_B.write(1);
 
     // End by 
-    // while (s_C_to_A.empty()) {}
-    int out = s_C_to_A.read();
-    out_intersect[0] = out;
+//#if EMPTY_CHECK
+//    while (s_C_to_A.empty()) {}
+//#endif
+//    int out = s_C_to_A.read();
+//    out_intersect[0] = out;
 }
 
 void PE_B(
@@ -29,7 +33,9 @@ void PE_B(
     // out
     hls::stream<int>& s_B_to_C) {
 
-    // while (s_A_to_B.empty()) {}
+#if EMPTY_CHECK
+    while (s_A_to_B.empty()) {}
+#endif
     int in = s_A_to_B.read();
     int out = layer_cache[in];
 
@@ -42,9 +48,11 @@ void PE_C(
     // out
     hls::stream<int>& s_C_to_A) {
 
-    // while (s_B_to_C.empty()) {}
+#if EMPTY_CHECK
+    while (s_B_to_C.empty()) {}
+#endif
     int out = s_B_to_C.read();
-    s_C_to_A.write(out);
+//    s_C_to_A.write(out);
 }
 
 
@@ -78,12 +86,12 @@ void vadd(
 
 #pragma HLS dataflow
     
-    hls::stream<int> s_A_to_B; 
+    hls::stream<int> s_A_to_B("A to B"); 
 #pragma HLS stream variable=s_A_to_B depth=512
-    hls::stream<int> s_B_to_C; 
-#pragma HLS stream variable=s_A_to_B depth=512
-    hls::stream<int> s_C_to_A; 
-#pragma HLS stream variable=s_A_to_B depth=512
+    hls::stream<int> s_B_to_C("B to C"); 
+#pragma HLS stream variable=s_B_to_C depth=512
+    hls::stream<int> s_C_to_A("C to A"); 
+#pragma HLS stream variable=s_C_to_A depth=512
 
     PE_A(
         // in
