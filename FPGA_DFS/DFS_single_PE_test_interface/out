@@ -1,0 +1,60 @@
+g++ -g -std=c++11 -I/home/wejiang/opt/xilinx/xrt/include -o host src/host.cpp -L/home/wejiang/opt/xilinx/xrt/lib -lxilinxopencl -pthread -lrt
+Compiled Host Executable: host
+mkdir -p ./xclbin
+v++ -g -t hw --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config executer.cfg -c -k scheduler --temp_dir ./_x.hw -o xclbin/scheduler.hw.xo src/scheduler.cpp
+Option Map File Used: '/tools/Xilinx/Vitis/2022.2/data/vitis/vpp/optMap.xml'
+
+****** v++ v2022.2 (64-bit)
+  **** SW Build 3671529 on 2022-10-13-17:52:11
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
+	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/reports/scheduler.hw
+	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/logs/scheduler.hw
+Running Dispatch Server on port: 42019
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/xclbin/scheduler.hw.xo.compile_summary, at Thu Jan  5 11:28:59 2023
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/reports/scheduler.hw/v++_compile_scheduler.hw_guidance.html', at Thu Jan  5 11:28:59 2023
+INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
+INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
+INFO: [v++ 74-78] Compiler Version string: 2022.2
+INFO: [v++ 60-585] Compiling for hardware target
+INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
+INFO: [v++ 60-242] Creating kernel: 'scheduler'
+INFO: [v++ 60-1616] Creating a HLS clock using kernel_frequency option: 140 MHz
+
+===>The following messages were generated while  performing high-level synthesis for kernel: scheduler Log file: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/scheduler.hw/scheduler/vitis_hls.log :
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_9_1'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_9_1'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_9_1'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_9_1'
+INFO: [v++ 200-790] **** Loop Constraint Status: All loop constraints were satisfied.
+INFO: [v++ 200-789] **** Estimated Fmax: 1136.36 MHz
+INFO: [v++ 60-594] Finished kernel compilation
+INFO: [v++ 60-244] Generating system estimate report...
+INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/reports/scheduler.hw/system_estimate_scheduler.hw.xtxt
+INFO: [v++ 60-586] Created xclbin/scheduler.hw.xo
+INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
+    vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/xclbin/scheduler.hw.xo.compile_summary 
+INFO: [v++ 60-791] Total elapsed time: 0h 1m 7s
+INFO: [v++ 60-1653] Closing dispatch client.
+mkdir -p ./xclbin
+v++ -g -t hw --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config scheduler.cfg -c -k executer --temp_dir ./_x.hw -o xclbin/executer.hw.xo src/executer.cpp
+Option Map File Used: '/tools/Xilinx/Vitis/2022.2/data/vitis/vpp/optMap.xml'
+
+****** v++ v2022.2 (64-bit)
+  **** SW Build 3671529 on 2022-10-13-17:52:11
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
+	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/reports/executer.hw
+	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/logs/executer.hw
+Running Dispatch Server on port: 43407
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/xclbin/executer.hw.xo.compile_summary, at Thu Jan  5 11:30:09 2023
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_DFS/DFS_single_PE_test_interface/_x.hw/reports/executer.hw/v++_compile_executer.hw_guidance.html', at Thu Jan  5 11:30:09 2023
+INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
+INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
+INFO: [v++ 74-78] Compiler Version string: 2022.2
+INFO: [v++ 60-585] Compiling for hardware target
+INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
+INFO: [v++ 60-242] Creating kernel: 'executer'
+INFO: [v++ 60-1616] Creating a HLS clock using kernel_frequency option: 140 MHz
