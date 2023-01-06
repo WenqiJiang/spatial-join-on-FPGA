@@ -248,6 +248,26 @@ Succeed.
 
 Performance: 36.6693 ms for 1 million iteration @300 MHz -> ~12 cycles per round. 1 Round = PE A write + PE B block read + PE B write + PE A block read. 4 operations in 12 cycles in reasonable, especially when we don't know AXIS latency can reach 1 cycle. 
 
+### multi_kernel_trial_13
+
+Similar structure to the spatial DB structure. 
+
+Kernel PE A is standalone (like the scheduler).
+
+Kernel PE B contains 3 sub-PEs (like the executor), each of them forward data to 
+
+With a loop.
+
+No AXIS data type.
+
+Has FIFO depth. 
+
+For each read operation, check data empty.
+
+Succeed.
+
+But somehow the summary.csv does not show performance numbers. In C++ measurement, it takes 45 ms for 1 million iteration (~15 cycles per round trip), quite reasonable given that we have 3 PEs in kernel PE B right now. 
+
 ### multi_kernel_trial_single_direction_3
 
 Single-direction AXI transfer between 2 PEs. 

@@ -52,16 +52,15 @@ class FPGA_tree_traversal_BFS:
         
         for current_level in range(1, self.max_level + 1):
 
+            start_addr_per_layer[current_level] = start_addr_per_layer[current_level - 1] + num_pairs_per_level[current_level - 1]
             # print("level: {}, num_pairs_per_level[current_level - 1]: {}".format(
             #     current_level, num_pairs_per_level[current_level - 1]))
-            if num_pairs_per_level[current_level - 1] == 0:
-                break
-
+            
             temp_results = []
             for i in range(num_pairs_per_level[current_level - 1]):
                 addr = start_addr_per_layer[current_level - 1] + i
-                print("level: {}, addr {}".format(
-                    current_level, addr))
+                # print("level: {}, addr {}".format(
+                #     current_level, addr))
                 node_A, node_B = level_cache[addr]
                 temp_results += self.join_nodes(node_A, node_B)
 
@@ -71,8 +70,7 @@ class FPGA_tree_traversal_BFS:
             else:
                 level_cache += temp_results
                 num_pairs_per_level[current_level] = len(temp_results)
-                start_addr_per_layer[current_level + 1] = start_addr_per_layer[current_level] + num_pairs_per_level[current_level]
-                print(num_pairs_per_level[current_level])
+                # print(num_pairs_per_level[current_level])
 
         return self.results
 

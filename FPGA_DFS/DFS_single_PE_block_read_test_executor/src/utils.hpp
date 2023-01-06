@@ -38,11 +38,10 @@ pair_t unpack_pair(ap_uint<64> input) {
 
 template<int num_stream>
 void replicate_termination_signal(
-    hls::stream<int>& s_join_finish,
+    hls::stream<int>& axis_join_finish,
     hls::stream<int> (&s_join_finish_replicated)[num_stream]) {
 
-    while (s_join_finish.empty()) {}
-    int end = s_join_finish.read();
+    int end = block_read<int>(axis_join_finish);
     for (int s = 0; s < num_stream; s++) {
 #pragma HLS unroll
         s_join_finish_replicated[s].write(end);

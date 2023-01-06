@@ -2,14 +2,6 @@
 
 #include "types.hpp"
 
-template<typename T>
-inline T block_read(hls::stream<T>& s) {
-#pragma HLS inline
-
-    while (s.empty()) {}
-    return s.read();
-}
-
 // pair_t to ap_uint<64>
 ap_uint<64> pack_pair(pair_t input) {
 #pragma HLS inline
@@ -34,16 +26,4 @@ pair_t unpack_pair(ap_uint<64> input) {
     output.id_B = id_B_uint;
 
     return output;
-}
-
-template<int num_stream>
-void replicate_termination_signal(
-    hls::stream<int>& axis_join_finish,
-    hls::stream<int> (&s_join_finish_replicated)[num_stream]) {
-
-    int end = block_read<int>(axis_join_finish);
-    for (int s = 0; s < num_stream; s++) {
-#pragma HLS unroll
-        s_join_finish_replicated[s].write(end);
-    }
 }
