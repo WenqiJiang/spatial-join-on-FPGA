@@ -1,6 +1,6 @@
 # FPGA DFS 
 
-### DFS_single_PE_block_read (debugging...)
+### DFS_single_PEd (debugging...)
 
 The entire DFS implementation without any performance optimization. 
 
