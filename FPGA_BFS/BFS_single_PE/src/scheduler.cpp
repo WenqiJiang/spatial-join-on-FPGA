@@ -30,9 +30,8 @@ void scheduler(
 
 // output streams
 #pragma HLS INTERFACE axis port=axis_read_write_control
-#pragma HLS INTERFACE axis port=axis_read_layer_id
-#pragma HLS INTERFACE axis port=axis_read_layer_pointer
-#pragma HLS INTERFACE axis port=axis_write_layer_id
+#pragma HLS INTERFACE axis port=axis_layer_cache_read_addr
+#pragma HLS INTERFACE axis port=axis_layer_cache_write_addr
 #pragma HLS INTERFACE axis port=axis_page_ID_pair_read_nodes
 #pragma HLS INTERFACE axis port=axis_join_finish
 
@@ -76,6 +75,9 @@ void scheduler(
             }
         }
     }
+
+    // final finish signal
+    axis_join_finish.write(1);
 }
 
 }

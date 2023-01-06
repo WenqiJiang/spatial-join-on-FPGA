@@ -20,13 +20,13 @@ int main(int argc, char** argv)
 
     std::cout << "Allocating memory...\n";
 
-    int max_level_A = 1;
-    int max_level_B = 1;
+    int max_level_A = 2;
+    int max_level_B = 2;
     int root_id_A = 0;
     int root_id_B = 0;
 
     // in init
-    int root_children_num = 1;
+    int root_children_num = 10;
     size_t page_num_A = 1 + root_children_num; // root and first level children
     size_t page_num_B = 1 + root_children_num; // root and first level children
 
@@ -57,12 +57,12 @@ int main(int argc, char** argv)
     // } node_meta_t;
     
     // root 
-    in_pages_A[0] = 1; // is_leaf
+    in_pages_A[0] = 0; // is_leaf
     in_pages_A[1] = root_children_num; // valid items
     in_pages_A[2] = 0; // id items
 
     
-    in_pages_B[0] = 1; // is_leaf
+    in_pages_B[0] = 0; // is_leaf
     in_pages_B[1] = root_children_num; // valid items
     in_pages_B[2] = 0; // id items
 
@@ -123,10 +123,10 @@ int main(int argc, char** argv)
 
     OCL_CHECK(err, err = krnl_executer.setArg(0, int(root_id_A)));
     OCL_CHECK(err, err = krnl_executer.setArg(1, int(root_id_B)));
-    OCL_CHECK(err, err = krnl_executer.setArg(8, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_executer.setArg(9, buffer_in_pages_B));
-    OCL_CHECK(err, err = krnl_executer.setArg(12, buffer_layer_cache));
-    OCL_CHECK(err, err = krnl_executer.setArg(13, buffer_out));
+    OCL_CHECK(err, err = krnl_executer.setArg(7, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_executer.setArg(8, buffer_in_pages_B));
+    OCL_CHECK(err, err = krnl_executer.setArg(11, buffer_layer_cache));
+    OCL_CHECK(err, err = krnl_executer.setArg(12, buffer_out));
 
 
     // Copy input data to device global memory
