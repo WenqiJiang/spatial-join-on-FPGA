@@ -7,18 +7,7 @@
 // Wenqi: seems 2022.1 somehow does not support linking ap_uint.h to host?
 // #include "ap_uint.h"
 
-#define LOAD_INDEX // load binary tree index
-// #define MANUAL_INDEX // manually malloc and write contents
-
-using namespace std;
-
-// boost::filesystem does not compile well, so implement this myself
-string dir_concat(string dir1, string dir2) {
-    if (dir1.back() != '/') {
-        dir1 += '/';
-    }
-    return dir1 + dir2;
-}
+#define DEBUG
 
 int main(int argc, char** argv)
 {
@@ -30,95 +19,35 @@ int main(int argc, char** argv)
     // create buffer using CL_MEM_USE_HOST_PTR to align user buffer to page boundary. It will 
     // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
 
+    std::cout << "Allocating memory...\n";
 
-#ifdef LOAD_INDEX
-
-    int max_level_A = 4;
-    int max_level_B = 4;
-    int root_id_A = 0;
-    int root_id_B = 0;
-
-    string tree_parent_dir = "/mnt/scratch/wenqi/spatial-join-on-FPGA/tree_bin";
-    // string tree_fname = "sample_tree_level_1_self_join_156.bin";
-    // string tree_fname = "sample_tree_level_2_self_join_2032.bin";
-    // string tree_fname = "sample_tree_level_3_self_join_22680.bin";
-    string tree_fname = "sample_tree_level_4_self_join_607568.bin";
-    string tree_bin_dir = dir_concat(tree_parent_dir, tree_fname);
-
-    // get data size from disk 
-    ifstream tree_fstream(
-        tree_bin_dir, ios::in | ios::binary);
-    tree_fstream.seekg(0, tree_fstream.end);
-    int64_t tree_bytes = tree_fstream.tellg();
-    tree_fstream.seekg(0, tree_fstream.beg);
-    cout << "Tree bytes: " << tree_bytes << endl;
-
-    // allocate memory 
-    cout << "Allocating memory...\n";
-    size_t bytes_page_A = tree_bytes;
-    size_t bytes_page_B = tree_bytes;
-    vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A / sizeof(int), 0);
-    vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B / sizeof(int), 0);
-
-    // size_t out_bytes = 10 * 1024 * 1024;
-    size_t layer_cache_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
-    cout << "layer_cache_bytes: " << layer_cache_bytes << endl;
-    vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t), 0);
-
-    // size_t out_bytes = 10 * 1024 * 1024;
-    size_t out_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
-    cout << "out_bytes: " << out_bytes << endl;
-    vector<int64_t ,aligned_allocator<int64_t>> out(out_bytes / sizeof(int64_t), 0);
-
-    // load data from disk
-    tree_fstream.read((char*) in_pages_A.data(), tree_bytes);
-    if (!tree_fstream) {
-            cout << "error: only " << tree_fstream.gcount() << " could be read";
-        exit(1);
-    }
-    memcpy(in_pages_B.data(), in_pages_A.data(), tree_bytes);
-
-    cout << "Root A info: " << endl;
-    cout << "  is leaf: " << in_pages_A[0] << endl;
-    cout << "  count: " << in_pages_A[1] << endl;
-
-    cout << "Root B info: " << endl;
-    cout << "  is leaf: " << in_pages_B[0] << endl;
-    cout << "  count: " << in_pages_B[1] << endl;
-
-    
-    float tmp_bound = *((float*) (&in_pages_A[64 + 1]));
-    cout << "First bound in A: " << tmp_bound << endl;
-#endif 
-
-#ifdef MANUAL_INDEX
     int max_level_A = 2;
     int max_level_B = 2;
     int root_id_A = 0;
     int root_id_B = 0;
 
     // in init
-    int root_children_num = 32;
-    cout << "Root's children number: " << root_children_num << endl;
+    int root_children_num = 16;
+    std::cout << "Root's children number: " << root_children_num << std::endl;
     size_t page_num_A = 1 + root_children_num; // root and first level children
     size_t page_num_B = 1 + root_children_num; // root and first level children
 
     size_t bytes_page_A = page_num_A * PAGE_SIZE;
     size_t bytes_page_B = page_num_B * PAGE_SIZE;
 
-    cout << "bytes per page: " << PAGE_SIZE << endl;
-    vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A, 0);
-    vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B, 0);
+    std::cout << "bytes per page: " << PAGE_SIZE << std::endl;
+    std::vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A, 0);
+    std::vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B, 0);
 
     // size_t out_bytes = 10 * 1024 * 1024;
     size_t layer_cache_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
-    cout << "layer_cache_bytes: " << layer_cache_bytes << endl;
-    vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t), 0);
+    std::cout << "layer_cache_bytes: " << layer_cache_bytes << std::endl;
+    std::vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t), 0);
 
     // size_t out_bytes = 10 * 1024 * 1024;
     size_t out_bytes = 4 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
-    cout << "out_bytes: " << out_bytes << endl;
-    vector<int64_t ,aligned_allocator<int64_t>> out(out_bytes / sizeof(int64_t), 0);
+    std::cout << "out_bytes: " << out_bytes << std::endl;
+    std::vector<int64_t ,aligned_allocator<int64_t>> out(out_bytes / sizeof(int64_t), 0);
 
     // set page contents
     // The first 64-bytes per page:
@@ -152,6 +81,9 @@ int main(int argc, char** argv)
             int children_id = i * 3 + j + 1; // root id = 0, children = 1, 2, ...
             if (children_id < 1 + root_children_num) {
                 int addr = header_bias + i * axi_int + j * obj_int + 0;
+#ifdef DEBUG
+                std::cout << "Addr: " << addr << "\t Child ID: " << children_id << "\t"; 
+#endif
                 in_pages_A[addr] = children_id;
                 in_pages_B[addr] = children_id;
             }
@@ -171,13 +103,12 @@ int main(int argc, char** argv)
         in_pages_B[bias + 1] = MAX_PAGE_ENTRIES; // valid items
         in_pages_B[bias + 2] = i; // id
     }
-#endif 
 // OPENCL HOST CODE AREA START
 
-    vector<cl::Device> devices = get_devices();
+    std::vector<cl::Device> devices = get_devices();
     cl::Device device = devices[0];
-    string device_name = device.getInfo<CL_DEVICE_NAME>();
-    cout << "Found Device=" << device_name.c_str() << endl;
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+    std::cout << "Found Device=" << device_name.c_str() << std::endl;
 
     //Creating Context and Command Queue for selected device
     cl::Context context(device);
@@ -194,7 +125,7 @@ int main(int argc, char** argv)
     cl::Kernel krnl_scheduler(program, "scheduler");
     cl::Kernel krnl_executer(program, "executer");
 
-    cout << "Finish loading bitstream...\n";
+    std::cout << "Finish loading bitstream...\n";
     // in init 
     OCL_CHECK(err, cl::Buffer buffer_in_pages_A   (context,CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, 
             bytes_page_A, in_pages_A.data(), &err));
@@ -207,7 +138,7 @@ int main(int argc, char** argv)
     OCL_CHECK(err, cl::Buffer buffer_out(context,CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY, 
             out_bytes, out.data(), &err));
 
-    cout << "Finish allocate buffer...\n";
+    std::cout << "Finish allocate buffer...\n";
 
     // int arg_counter = 0;    
     // in 
@@ -232,9 +163,9 @@ int main(int argc, char** argv)
         },0/* 0 means from host*/));
     q.finish();
 
-    cout << "Launching kernel...\n";
+    std::cout << "Launching kernel...\n";
     // Launch the Kernel
-    auto start = chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     OCL_CHECK(err, err = q.enqueueTask(krnl_scheduler));
     OCL_CHECK(err, err = q.enqueueTask(krnl_executer));
     q.finish();
@@ -243,14 +174,15 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out},CL_MIGRATE_MEM_OBJECT_HOST));
     q.finish();
 
-    auto end = chrono::high_resolution_clock::now();
-    double duration = (chrono::duration_cast<chrono::milliseconds>(end-start).count() / 1000.0);
+    auto end = std::chrono::high_resolution_clock::now();
+    double duration = (std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / 1000.0);
 
-    cout << "Duration (including memcpy out): " << duration << " sec" << endl; 
+    std::cout << "Duration (including memcpy out): " << duration << " sec" << std::endl; 
 
-    cout << "Intersect pair number: " << out[0] << endl;
+    std::cout << "Intersect pair number: " << out[0] << std::endl;
+    std::cout << "Overall page per second = " << (page_num_A * page_num_B) / duration << std::endl;
 
-    cout << "TEST FINISHED (NO RESULT CHECK)" << endl; 
+    std::cout << "TEST FINISHED (NO RESULT CHECK)" << std::endl; 
 
     return  0;
 }

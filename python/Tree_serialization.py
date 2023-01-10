@@ -11,7 +11,7 @@ from Index.Tree_generation import generate_rtree, collect_all_nodes, index_seria
 if __name__ == '__main__':
 
     print("\n\nRunning serialization on generated R trees:")
-    max_level = 4
+    max_level = 1
     directory_node_fanout = 8
     data_node_fanout = 16
     root_A = generate_rtree(max_level=max_level, directory_node_fanout=directory_node_fanout, data_node_fanout=data_node_fanout, root_mbr=None)

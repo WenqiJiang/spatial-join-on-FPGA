@@ -2,6 +2,7 @@
 Generate a random RTree
 """
 import numpy as np
+from struct import pack
 
 from Index.Region import MBR
 from Index.RTree import Node
@@ -34,14 +35,6 @@ def generate_rtree(max_level=2, directory_node_fanout=2, data_node_fanout=100, r
     """
     Return the root node of a random R-tree generated with the input arguments
     """
-
-    assert max_level >= 2, "Level must be larger than 2 (root is a level itself)"
-    if root_mbr is None:
-        root_mbr = MBR(0, 100, 0, 100)
-    
-    # create root node
-    root_node = Node(node_id=0, is_leaf=False, mbr=root_mbr)
-
     class TreeGenerator:
 
         global_obj_counter = None
@@ -70,6 +63,15 @@ def generate_rtree(max_level=2, directory_node_fanout=2, data_node_fanout=100, r
                     node.add_entry(child_mbr, child_node)
                     self.generate_recursive(child_node, current_level + 1, max_level, directory_node_fanout, data_node_fanout)
 
+    if root_mbr is None:
+        root_mbr = MBR(0, 100, 0, 100)
+
+    if max_level == 1: 
+        root_is_leaf = True
+    else: # max_level >= 2
+        root_is_leaf = False
+
+    root_node = Node(node_id=0, is_leaf=root_is_leaf, mbr=root_mbr)
     tree_generator = TreeGenerator(global_nodes_counter=1)
     tree_generator.generate_recursive(root_node, 1, max_level, directory_node_fanout, data_node_fanout)
 
@@ -104,7 +106,7 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
         all the FPGA related parameters 
             node_bytes: the size per page for a single node
         output file directory: no file write without specifying 
-        
+
     FPGA storage format:
         one node per page (e.g., 4096 bytes)
         data are split in 64-byte AXI width 
@@ -155,10 +157,10 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
 
         node_bin += int(node.node_id).to_bytes(4, "little", signed=False)
 
-        node_bin += int(node.mbr.get_low0()).to_bytes(4, "little", signed=False)
-        node_bin += int(node.mbr.get_high0()).to_bytes(4, "little", signed=False)
-        node_bin += int(node.mbr.get_low1()).to_bytes(4, "little", signed=False)
-        node_bin += int(node.mbr.get_high1()).to_bytes(4, "little", signed=False)
+        node_bin += pack('<f', node.mbr.get_low0())
+        node_bin += pack('<f', node.mbr.get_high0())
+        node_bin += pack('<f', node.mbr.get_low1())
+        node_bin += pack('<f', node.mbr.get_high1())
 
         assert len(node_bin) == header_bytes
         node_bin += (AXI_bytes - header_bytes) * empty_byte
@@ -178,10 +180,10 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
                     if child_id >= node.count:
                         break
                     node_bin += int(node.obj_ids[i]).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.mbrs[i].get_low0()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.mbrs[i].get_high0()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.mbrs[i].get_low1()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.mbrs[i].get_high1()).to_bytes(4, "little", signed=False)
+                    node_bin += pack('<f', node.mbrs[i].get_low0())
+                    node_bin += pack('<f', node.mbrs[i].get_high0())
+                    node_bin += pack('<f', node.mbrs[i].get_low1())
+                    node_bin += pack('<f', node.mbrs[i].get_high1())
                 node_bin += (AXI_bytes - 3 * obj_bytes) * empty_byte
         # for directory node, fill id as children node id
         else: # is directory
@@ -195,10 +197,10 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
                     if child_id >= node.count:
                         break
                     node_bin += int(node.child_ptrs[i].node_id).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.child_ptrs[i].mbr.get_low0()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.child_ptrs[i].mbr.get_high0()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.child_ptrs[i].mbr.get_low1()).to_bytes(4, "little", signed=False)
-                    node_bin += int(node.child_ptrs[i].mbr.get_high1()).to_bytes(4, "little", signed=False)
+                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_low0())
+                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_high0())
+                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_low1())
+                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_high1())
                 node_bin += (AXI_bytes - 3 * obj_bytes) * empty_byte
 
         # final assertion & padding
