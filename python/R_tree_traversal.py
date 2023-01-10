@@ -11,7 +11,8 @@ from Index.Tree_generation import generate_rtree
 
 
 def create_nodes():
-    node = Node(is_leaf=True, mbr=MBR(1,2,1,2))
+    print("\n\nRunning self join on a single node:")
+    node = Node(node_id=0, is_leaf=True, mbr=MBR(1,2,1,2))
     node.add_entry(MBR(1,2,1,2), 10)
     mbr_list = [MBR(1,2,1,2)] * 5
     node.add_entries(mbr_list, [1,2,3,4,5])
@@ -23,13 +24,14 @@ def create_nodes():
     results = join_data_nodes(node, node)
     print("self join results ({} pairs): {}".format(len(results), results))
 
-    node = Node(is_leaf=False, mbr=MBR(3,4,3,4))
+    node = Node(node_id=0, is_leaf=False, mbr=MBR(3,4,3,4))
     node.add_entry(MBR(3,4,3,4), 12)
     mbr_list = [MBR(3,4,3,4)] * 5
     node.add_entries(mbr_list, [6,7,8,9,10])
     node.print_contents()
 
 def join_trees():
+    print("\n\nRunning synchronous traversal on generated R trees:")
     root_A = generate_rtree(max_level=4, directory_node_fanout=2, data_node_fanout=100, root_mbr=None)
     root_B = generate_rtree(max_level=2, directory_node_fanout=2, data_node_fanout=100, root_mbr=None)
 

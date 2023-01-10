@@ -36,14 +36,24 @@ pair_t unpack_pair(ap_uint<64> input) {
     return output;
 }
 
-template<int num_stream>
-void replicate_termination_signal(
-    hls::stream<int>& axis_join_finish,
-    hls::stream<int> (&s_join_finish_replicated)[num_stream]) {
+void pass_termination_signal(
+    // from AXIS
+    hls::stream<int> &axis_join_finish,
+    // to internal PEs
+    hls::stream<int> &s_join_finish_replicated) {
 
     int end = block_read<int>(axis_join_finish);
-    for (int s = 0; s < num_stream; s++) {
-#pragma HLS unroll
-        s_join_finish_replicated[s].write(end);
-    }
+    s_join_finish_replicated.write(end);
 }
+
+// template<int num_stream>
+// void replicate_termination_signal(
+//     hls::stream<int>& axis_join_finish,
+//     hls::stream<int> (&s_join_finish_replicated)[num_stream]) {
+
+//     int end = block_read<int>(axis_join_finish);
+//     for (int s = 0; s < num_stream; s++) {
+// #pragma HLS unroll
+//         s_join_finish_replicated[s].write(end);
+//     }
+// }

@@ -7,6 +7,7 @@
 // Wenqi: seems 2022.1 somehow does not support linking ap_uint.h to host?
 // #include "ap_uint.h"
 
+#define DEBUG
 
 int main(int argc, char** argv)
 {
@@ -26,7 +27,8 @@ int main(int argc, char** argv)
     int root_id_B = 0;
 
     // in init
-    int root_children_num = 10;
+    int root_children_num = 16;
+    std::cout << "Root's children number: " << root_children_num << std::endl;
     size_t page_num_A = 1 + root_children_num; // root and first level children
     size_t page_num_B = 1 + root_children_num; // root and first level children
 
@@ -56,15 +58,37 @@ int main(int argc, char** argv)
     //     obj_t obj;    // id/ptr + mbr
     // } node_meta_t;
     
-    // root 
+    // root -> set basic info
     in_pages_A[0] = 0; // is_leaf
     in_pages_A[1] = root_children_num; // valid items
     in_pages_A[2] = 0; // id items
 
-    
     in_pages_B[0] = 0; // is_leaf
     in_pages_B[1] = root_children_num; // valid items
     in_pages_B[2] = 0; // id items
+
+    // root -> set page contents
+    // in_pages_A[16] = 1;
+    // in_pages_B[16] = 1;
+    const int axi_bytes = 64; // 64 byte 
+    const int axi_int = 64 / sizeof(int); // 16 int per page
+    const int obj_int = 20 / sizeof(int); // 20 byte (5 int ) per object
+    const int header_bias = axi_int; // first 64 byte = header
+    for (int i = 0; i < root_children_num / 3 + 1; i++) {
+        
+        for (int j = 0; j < 3; j++) { // 3 obj per AXI
+            // addr for obj id (page id for directory nodes)
+            int children_id = i * 3 + j + 1; // root id = 0, children = 1, 2, ...
+            if (children_id < 1 + root_children_num) {
+                int addr = header_bias + i * axi_int + j * obj_int + 0;
+#ifdef DEBUG
+                std::cout << "Addr: " << addr << "\t Child ID: " << children_id << "\t"; 
+#endif
+                in_pages_A[addr] = children_id;
+                in_pages_B[addr] = children_id;
+            }
+        }
+    }
 
     // data nodes
     for (int i = 1; i < page_num_A; i++) {
@@ -137,6 +161,7 @@ int main(int argc, char** argv)
         buffer_layer_cache,
         buffer_out
         },0/* 0 means from host*/));
+    q.finish();
 
     std::cout << "Launching kernel...\n";
     // Launch the Kernel

@@ -73,8 +73,8 @@ void executer(
     hls::stream<obj_t> s_page_B;
 #pragma HLS stream variable=s_page_B depth=512
     
-    hls::stream<int> s_join_finish_replicated[4]; 
-#pragma HLS stream variable=s_join_finish_replicated depth=2
+    hls::stream<int> s_join_finish[4]; 
+#pragma HLS stream variable=s_join_finish depth=2
 
     hls::stream<int> s_intersect_count_directory;
 #pragma HLS stream variable=s_intersect_count_directory depth=512
@@ -88,21 +88,26 @@ void executer(
     hls::stream<result_t> s_result_pair_leaf;
 #pragma HLS stream variable=s_result_pair_leaf depth=512
 
-    replicate_termination_signal<4>(
+    pass_termination_signal(
+        // from AXIS
         axis_join_finish,
-        s_join_finish_replicated); 
+        // to internal PEs
+        s_join_finish[0]
+    ); 
 
     read_nodes(
         // input
         in_pages_A,
         in_pages_B,
         axis_page_ID_pair_read_nodes,
-        s_join_finish_replicated[0],
+        s_join_finish[0],
         // output
         s_meta_A,
         s_meta_B,
         s_page_A,
-        s_page_B);
+        s_page_B,
+        s_join_finish[1]
+    );
 
     layer_cache_memory_controller(
         // input
@@ -119,11 +124,12 @@ void executer(
         axis_read_layer_id,      // layer l 
         axis_read_layer_pointer, // pair p in layer l
         axis_write_layer_id, 
-        s_join_finish_replicated[1],
+        s_join_finish[1],
         // output
         //   to scheduler
         axis_page_pair_scheduler,      // for read request, return pair
-        axis_intersect_count_directory_scheduler // for write request, return count
+        axis_intersect_count_directory_scheduler, // for write request, return count
+        s_join_finish[2]
     );
 
     join_page(
@@ -132,14 +138,16 @@ void executer(
         s_meta_B,
         s_page_A,
         s_page_B,
-        s_join_finish_replicated[2],
+        s_join_finish[2],
         // output
         //   for directory nodes: 
         s_intersect_count_directory, // per page pair
         s_result_pair_directory,
         //   for leaf nodes: 
         s_intersect_count_leaf, // per page pair
-        s_result_pair_leaf);
+        s_result_pair_leaf,
+        s_join_finish[3]
+    );
 
     write_results(
         // input
@@ -147,11 +155,12 @@ void executer(
         s_intersect_count_leaf, // per page pair
         s_result_pair_leaf,
         //   from the scheduler
-        s_join_finish_replicated[3],  // final end signal 
+        s_join_finish[3],  // final end signal 
         // out
         //    out format: the first number writes total intersection count, 
         //                while the rest are intersect ID pairs
-        out_intersect);
+        out_intersect
+    );
 }
 
 }

@@ -11,16 +11,16 @@ void join_page(
     hls::stream<node_meta_t>& s_meta_B,
     hls::stream<obj_t>& s_page_A,
     hls::stream<obj_t>& s_page_B,
-    hls::stream<int>& s_join_finish_replicated,
+    hls::stream<int>& s_join_finish_in,
     // output
     //   for directory nodes: 
     hls::stream<int>& s_intersect_count_directory, // per page pair
     hls::stream<result_t>& s_result_pair_directory,
     //   for leaf nodes: 
     hls::stream<int>& s_intersect_count_leaf, // per page pair
-    hls::stream<result_t>& s_result_pair_leaf
+    hls::stream<result_t>& s_result_pair_leaf,
+    hls::stream<int>& s_join_finish_out
     ) {
-
 
     obj_t page_A[MAX_PAGE_ENTRY_NUM];
     obj_t page_B[MAX_PAGE_ENTRY_NUM];
@@ -30,10 +30,7 @@ void join_page(
     // for (long infinite_counter = 0; infinite_counter < 1000 * 1000 * 1000 * 1000; infinite_counter++) {
     while (true) {
 
-        if (!s_join_finish_replicated.empty()) {
-            int end = s_join_finish_replicated.read();
-            break;
-        } else if (!s_meta_A.empty() || !s_meta_B.empty()) {
+        if (!s_meta_A.empty() || !s_meta_B.empty()) {
 
             node_meta_t meta_A = s_meta_A.read();
             node_meta_t meta_B = s_meta_B.read();
@@ -168,6 +165,10 @@ void join_page(
                 // write count
                 s_intersect_count_directory.write(intersect_count);
             }
-        }
+        } else if (!s_join_finish_in.empty()) {
+            int end = s_join_finish_in.read();
+            s_join_finish_out.write(end);
+            break;
+        }  
     }
 }

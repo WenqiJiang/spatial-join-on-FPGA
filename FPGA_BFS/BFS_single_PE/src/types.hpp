@@ -32,14 +32,14 @@ typedef struct {
     obj_t obj;    // id/ptr + mbr
 } node_meta_t;
 
-typedef struct {
-    node_meta_t meta_data; 
+// typedef struct {
+//     node_meta_t meta_data; 
 
-    mbr_t mbrs[MAX_PAGE_ENTRIES]; 
-    // for directory nodes: page addresses of the children
-    // for leaf nodes: object IDs
-    int ids[MAX_PAGE_ENTRIES];      
-} node_t;
+//     mbr_t mbrs[MAX_PAGE_ENTRIES]; 
+//     // for directory nodes: page addresses of the children
+//     // for leaf nodes: object IDs
+//     int ids[MAX_PAGE_ENTRIES];      
+// } node_t;
 
 typedef struct {
     // these IDs can either be object IDs (for data nodes)

@@ -3,6 +3,7 @@ class Node:
     """
     Refer to R-tree Node: https://github.com/WenqiJiang/CPU-spatial-join/blob/main/include/2D/point_index/RTree.h
     """
+    node_id = None 
     is_leaf = False
     count = 0
     mbr = None # MBR for the entire node
@@ -11,7 +12,8 @@ class Node:
     obj_ids = None # for data nodes
     mbrs = None
 
-    def __init__(self, is_leaf : bool, mbr):
+    def __init__(self, node_id : int, is_leaf : bool, mbr):
+        self.node_id = node_id 
         self.is_leaf = is_leaf
         self.mbr = mbr 
         if not is_leaf:

@@ -41,18 +41,20 @@ void read_nodes(
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
     hls::stream<pair_t>& axis_page_ID_pair_read_nodes,
-    hls::stream<int>& s_join_finish_replicated,
+    hls::stream<int>& s_join_finish_in,
     // output
     hls::stream<node_meta_t>& s_meta_A,
     hls::stream<node_meta_t>& s_meta_B,
     hls::stream<obj_t>& s_page_A,
-    hls::stream<obj_t>& s_page_B
+    hls::stream<obj_t>& s_page_B,
+    hls::stream<int>& s_join_finish_out
     ) {
 
     while (true) {
 
-        if (!s_join_finish_replicated.empty()) {
-            int end = s_join_finish_replicated.read();
+        if (!s_join_finish_in.empty()) {
+            int end = s_join_finish_in.read();
+            s_join_finish_out.write(end);
             break;
         } else if (!axis_page_ID_pair_read_nodes.empty()) {
 
@@ -152,11 +154,12 @@ void layer_cache_memory_controller(
     hls::stream<int>& axis_read_layer_id,      // layer l 
     hls::stream<int>& axis_read_layer_pointer, // pair p in layer l
     hls::stream<int>& axis_write_layer_id, 
-    hls::stream<int>& s_join_finish_replicated,
+    hls::stream<int>& s_join_finish_in,
     // output
     //   to scheduler
     hls::stream<pair_t>& axis_page_pair_scheduler,      // for read request, return pair
-    hls::stream<int>& axis_intersect_count_directory_scheduler // for write request, return count
+    hls::stream<int>& axis_intersect_count_directory_scheduler, // for write request, return count
+    hls::stream<int>& s_join_finish_out
 ) {
 
     // Initialization: write the pair (rootA, rootB) in layer cache 0
@@ -177,8 +180,9 @@ void layer_cache_memory_controller(
     
     while (true) {
 
-        if (!s_join_finish_replicated.empty()) {
-            int end = s_join_finish_replicated.read();
+        if (!s_join_finish_in.empty()) {
+            int end = s_join_finish_in.read();
+            s_join_finish_out.write(end);
             break;
         } else if (!axis_read_write_control.empty()) {
 
@@ -224,7 +228,7 @@ void write_results(
     hls::stream<int>& s_intersect_count_leaf, // per page pair
     hls::stream<result_t>& s_result_pair_leaf,
     //   from the scheduler
-    hls::stream<int>& s_join_finish_replicated,  // final end signal 
+    hls::stream<int>& s_join_finish_in,  // final end signal 
     // out
     //    out format: the first number writes total intersection count, 
     //                while the rest are intersect ID pairs
@@ -236,8 +240,8 @@ void write_results(
     while (true) {
 
         // the entire join is finished
-        if (!s_join_finish_replicated.empty()) {
-            int end = s_join_finish_replicated.read();
+        if (!s_join_finish_in.empty()) {
+            int end = s_join_finish_in.read();
             break;
         }
         // if data is available, finish writing results of a pair of node join
