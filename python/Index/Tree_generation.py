@@ -2,7 +2,7 @@
 Generate a random RTree
 """
 import numpy as np
-from struct import pack
+from struct import pack, unpack, unpack_from
 
 from Index.Region import MBR
 from Index.RTree import Node
@@ -26,7 +26,7 @@ def random_sub_MBR(mbr):
     new_low1 = low1 + r1_low * delta_1
     new_high1 = low1 + r1_high * delta_1
 
-    sub_mbr = MBR(new_low0, new_high0, new_low1, new_high1)
+    sub_mbr = MBR(np.float32(new_low0), np.float32(new_high0), np.float32(new_low1), np.float32(new_high1))
 
     return sub_mbr
 
@@ -227,6 +227,80 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
             f.write(tree_bin)
 
     return tree_bin
+
+def load_serialized_index(in_dir, node_bytes=4096):
+    """
+    Given a binary index, reconstruct it to the tree structure, and return the root
+    """
+
+    def node_deserialization(node_bin):
+        """
+        Given a binary format of node, return the real python data structure
+        NOTE! For directory nodes, the child_ptrs field, instead of being the real pointer, 
+            are children IDs, these must be converted into real pointer afterwards
+        """
+
+        # meta data: 28 byte out of the first 64
+        is_leaf = unpack_from("<i", node_bin, offset=0)[0]
+        count = unpack_from("<i", node_bin, offset=4)[0]
+        node_id = unpack_from("<i", node_bin, offset=8)[0]
+
+        low0 = unpack_from("<f", node_bin, offset=12)[0]
+        high0 = unpack_from("<f", node_bin, offset=16)[0]
+        low1 = unpack_from("<f", node_bin, offset=20)[0]
+        high1 = unpack_from("<f", node_bin, offset=24)[0]
+        mbr = MBR(low0, high0, low1, high1)
+
+        node = Node(node_id, is_leaf, mbr)
+        node.count = count
+
+        # handle all the children
+        for i in range(int(np.ceil(node.count / 3.0))):
+            # append 3 objects, then fill 4 bytes
+            for j in range(3):
+                child_id = i * 3 + j
+                child_id_addr = 64 + 64 * i + 20 * j
+                if child_id >= node.count:
+                    break
+
+                id = unpack_from("<i", node_bin, offset=child_id_addr)
+                low0 = unpack_from("<f", node_bin, offset=child_id_addr + 4)[0]
+                high0 = unpack_from("<f", node_bin, offset=child_id_addr + 8)[0]
+                low1 = unpack_from("<f", node_bin, offset=child_id_addr + 12)[0]
+                high1 = unpack_from("<f", node_bin, offset=child_id_addr + 16)[0]
+                mbr = MBR(low0, high0, low1, high1)
+                
+                node.add_entry(mbr, id)
+
+        return node
+
+    tree_bin = bytes()
+    with open(in_dir, 'rb') as f:
+        tree_bin = f.read()
+
+    assert len(tree_bin) % node_bytes == 0
+    num_nodes = int(len(tree_bin) / node_bytes)
+    
+    node_list = []
+    for i in range(num_nodes):
+        node_bin = tree_bin[i * node_bytes: (i + 1) * node_bytes]
+        # here, the children ptr for directory nodes as just node IDs
+        node_list.append(node_deserialization(node_bin))
+
+    node_list.sort(key=lambda n: n.node_id)
+    for i in range(len(node_list)):
+        assert node_list[i].node_id == i
+
+    # replace the children id by real pointers
+    for node in node_list: 
+        if not node.is_leaf: 
+            for i, child_id in enumerate(node.child_ptrs):
+                node.child_ptrs[i] = node_list[child_id]
+
+    root = node_list[0]
+
+    return root
+
 
 if __name__ == "__main__":
 	

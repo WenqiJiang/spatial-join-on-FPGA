@@ -33,16 +33,17 @@ int main(int argc, char** argv)
 
 #ifdef LOAD_INDEX
 
-    int max_level_A = 4;
-    int max_level_B = 4;
+    int max_level_A = 1;
+    int max_level_B = 1;
     int root_id_A = 0;
     int root_id_B = 0;
 
     string tree_parent_dir = "/mnt/scratch/wenqi/spatial-join-on-FPGA/tree_bin";
+    string tree_fname = "sample_tree_level_1_self_join_128.bin";
     // string tree_fname = "sample_tree_level_1_self_join_156.bin";
     // string tree_fname = "sample_tree_level_2_self_join_2032.bin";
     // string tree_fname = "sample_tree_level_3_self_join_22680.bin";
-    string tree_fname = "sample_tree_level_4_self_join_607568.bin";
+    // string tree_fname = "sample_tree_level_4_self_join_607568.bin";
     string tree_bin_dir = dir_concat(tree_parent_dir, tree_fname);
 
     // get data size from disk 
@@ -87,8 +88,83 @@ int main(int argc, char** argv)
     cout << "  count: " << in_pages_B[1] << endl;
 
     
-    float tmp_bound = *((float*) (&in_pages_A[64 + 1]));
-    cout << "First bound in A: " << tmp_bound << endl;
+    cout << "First obj in A: " << endl;
+    cout << " ID: " << in_pages_A[16 + 0] << endl;
+    float tmp_A_bound_low0 = *((float*) (&in_pages_A[16 + 1]));
+    float tmp_A_bound_high0 = *((float*) (&in_pages_A[16 + 2]));
+    float tmp_A_bound_low1 = *((float*) (&in_pages_A[16 + 3]));
+    float tmp_A_bound_high1 = *((float*) (&in_pages_A[16 + 4]));
+    cout << " Boundary: low 0: " << tmp_A_bound_low0 << 
+        " high 0: " << tmp_A_bound_high0 << 
+        " low 1: " << tmp_A_bound_low1 <<
+        " high 1: " << tmp_A_bound_high1 << endl;
+
+    cout << "First obj in B: " << endl;
+    cout << " ID: " << in_pages_B[16 + 0] << endl;
+    float tmp_B_bound_low0 = *((float*) (&in_pages_B[16 + 1]));
+    float tmp_B_bound_high0 = *((float*) (&in_pages_B[16 + 2]));
+    float tmp_B_bound_low1 = *((float*) (&in_pages_B[16 + 3]));
+    float tmp_B_bound_high1 = *((float*) (&in_pages_B[16 + 4]));
+    cout << " Boundary: low 0: " << tmp_B_bound_low0 << 
+        " high 0: " << tmp_B_bound_high0 << 
+        " low 1: " << tmp_B_bound_low1 <<
+        " high 1: " << tmp_B_bound_high1 << endl;
+
+    int root_count_A = in_pages_A[1];
+    int root_count_B = in_pages_B[1];
+    vector<float> objects_A(4 * root_count_A, 0);
+    vector<float> objects_B(4 * root_count_B, 0);
+
+    // copy contents to a dense array
+    for (int i = 0; i < root_count_A / 3 + 1; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (i * 3 + j >= root_count_A) {
+                break;
+            }
+            int start_addr = (64 + i * 64 + j * 20 + 4) / sizeof(int);
+            int dense_addr = (i * 3 + j) * 4;
+            objects_A[dense_addr + 0] = *((float*) (&in_pages_A[start_addr + 0]));
+            objects_A[dense_addr + 1] = *((float*) (&in_pages_A[start_addr + 1]));
+            objects_A[dense_addr + 2] = *((float*) (&in_pages_A[start_addr + 2]));
+            objects_A[dense_addr + 3] = *((float*) (&in_pages_A[start_addr + 3]));
+        }
+    }
+    for (int i = 0; i < root_count_B / 3 + 1; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (i * 3 + j >= root_count_B) {
+                break;
+            }
+            int start_addr = (64 + i * 64 + j * 20 + 4) / sizeof(int);
+            int dense_addr = (i * 3 + j) * 4;
+            objects_B[dense_addr + 0] = *((float*) (&in_pages_B[start_addr + 0]));
+            objects_B[dense_addr + 1] = *((float*) (&in_pages_B[start_addr + 1]));
+            objects_B[dense_addr + 2] = *((float*) (&in_pages_B[start_addr + 2]));
+            objects_B[dense_addr + 3] = *((float*) (&in_pages_B[start_addr + 3]));
+        }
+    }
+
+    // compute sw intersect
+    int sw_intersect_count = 0;
+    for (int i = 0; i < root_count_A; i++) {
+        for (int j = 0; j < root_count_B; j++) {
+            float low0_A = objects_A[4 * i + 0];
+            float high0_A = objects_A[4 * i + 1];
+            float low1_A = objects_A[4 * i + 2];
+            float high1_A = objects_A[4 * i + 3];
+
+            float low0_B = objects_B[4 * j + 0];
+            float high0_B = objects_B[4 * j + 1];
+            float low1_B = objects_B[4 * j + 2];
+            float high1_B = objects_B[4 * j + 3];
+
+            if ((high0_A >= low0_B) && (high0_B >= low0_A) && 
+                (high1_A >= low1_B) && (high1_B >= low1_A)) {
+                sw_intersect_count++;
+            }
+        }
+    }
+    cout << "sw intersect count: " << sw_intersect_count << endl;
+
 #endif 
 
 #ifdef MANUAL_INDEX
