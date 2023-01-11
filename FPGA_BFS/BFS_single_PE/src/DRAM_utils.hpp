@@ -38,6 +38,7 @@ node_meta_t parse_meta_data(ap_uint<512> in_uint512) {
 // Note: the current design underutilizes the bandwidth for convenience
 void read_nodes(
     // input
+    const int page_bytes, 
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
     hls::stream<pair_t>& axis_page_ID_pair_read_nodes,
@@ -50,6 +51,8 @@ void read_nodes(
     hls::stream<int>& s_join_finish_out
     ) {
 
+    const int page_size_per_axi = page_bytes / 64; 
+
     while (true) {
 
         if (!axis_page_ID_pair_read_nodes.empty()) {
@@ -58,8 +61,8 @@ void read_nodes(
             int page_ID_A = page_ID_pair.id_A;
             int page_ID_B = page_ID_pair.id_B;
 
-            int start_addr_A = PAGE_SIZE_PER_AXI * page_ID_A;
-            int start_addr_B = PAGE_SIZE_PER_AXI * page_ID_B;
+            int start_addr_A = page_size_per_axi * page_ID_A;
+            int start_addr_B = page_size_per_axi * page_ID_B;
 
             // read meta data to get the page
             node_meta_t meta_A = parse_meta_data(in_pages_A[start_addr_A]);

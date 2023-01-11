@@ -34,21 +34,21 @@ XCLBIN_DIR := ./xclbin
 TEMP_DIR := ./_x.$(TARGET)
 # sources
 KERNEL_SRC_0 := src/scheduler.cpp
-KERNEL_SRC_1 := src/executer.cpp
+KERNEL_SRC_1 := src/executor.cpp
 HOST_SRC := src/host.cpp
 
 # targets
 HOST_EXE := host
 
 KERNEL_0 := scheduler
-KERNEL_1 := executer
+KERNEL_1 := executor
 XO_0 := $(XCLBIN_DIR)/$(KERNEL_0).$(TARGET).xo
 XO_1 := $(XCLBIN_DIR)/$(KERNEL_1).$(TARGET).xo
 XCLBIN := $(XCLBIN_DIR)/vadd.$(TARGET).xclbin
 EMCONFIG_FILE := ./emconfig.json
 
 VPP_COMMON_OPTS := -g -t $(TARGET) --platform $(PLATFORM) --save-temps
-VPP_CONFIG_OPTS_0 := --config executer.cfg
+VPP_CONFIG_OPTS_0 := --config executor.cfg
 VPP_CONFIG_OPTS_1 := --config scheduler.cfg
 VPP_LINK_CONFIG := --config vivado.cfg
 CFLAGS := -g -std=c++11 -I$(XILINX_XRT)/include

@@ -2,6 +2,8 @@
 
 ### DFS_single_PEd (debugging...)
 
+Wenqi: the bugs are probably caused by the ordering between join signal and meta data signal detection. But since we are not going to use DFS in the end, I did not try this out...
+
 The entire DFS implementation without any performance optimization. 
 
 This contains two kernels, a scheduler and an executor passing data to each other. 

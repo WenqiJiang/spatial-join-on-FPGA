@@ -5,10 +5,11 @@
 
 extern "C" {
 
-void executer(  
+void executor(  
     ///// input /////
     int root_id_A,
     int root_id_B,
+    int page_bytes,
     // input streams
     //   to layer cache controller
     hls::stream<int>& axis_read_write_control, // 0 -> read from memory; 1 -> write to memory 
@@ -95,6 +96,7 @@ void executer(
 
     read_nodes(
         // input
+        page_bytes,
         in_pages_A,
         in_pages_B,
         axis_page_ID_pair_read_nodes,

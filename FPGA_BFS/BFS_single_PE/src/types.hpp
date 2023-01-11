@@ -5,6 +5,23 @@
 
 #include "constants.hpp"
 
+//////////////////////////////////
+//   Tree format on FPGAs       //
+//////////////////////////////////
+// Node distribution:
+//   [node 0, node 1, ... node N]
+//   each node has a size of page_bytes (e.g., 4 KB)
+//   the address of each node can be induced by node_id * page_bytes
+// 
+// Within a node:
+//   first 64 byte: meta data (node_meta_t), contains the basic info -
+//     is this a leaf? children count? node id? node MBR? 
+//   the rest of the page consists of children:
+//     within each 64-byte block, 60 bytes are actually used, which 
+//       contains 3 * obj_t
+//     if the node is a leaf, then the id in obj_t is object id, 
+//       otherwise it is a child node id
+//////////////////////////////////
 
 typedef struct {
     // minimum bounding rectangle 
@@ -13,7 +30,6 @@ typedef struct {
     float low1; 
     float high1; 
 } mbr_t; 
-
 
 typedef struct {
     // obj id for data nodes; pointer to children for directory nodes
@@ -31,15 +47,6 @@ typedef struct {
     int count;    // valid items
     obj_t obj;    // id/ptr + mbr
 } node_meta_t;
-
-// typedef struct {
-//     node_meta_t meta_data; 
-
-//     mbr_t mbrs[MAX_PAGE_ENTRIES]; 
-//     // for directory nodes: page addresses of the children
-//     // for leaf nodes: object IDs
-//     int ids[MAX_PAGE_ENTRIES];      
-// } node_t;
 
 typedef struct {
     // these IDs can either be object IDs (for data nodes)

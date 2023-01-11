@@ -4,15 +4,16 @@
 // 0 -> does not count
 #define POINT_INTERSECT_COUNTS 1 
 
-#define PAGE_SIZE 4096
-#define PAGE_SIZE_PER_AXI (PAGE_SIZE / 64)
-// mbr 16 bytes + children/obj_ID 8 bytes = 24 bytes; 128 * 20 = 2560 < 4096 
-#define MAX_PAGE_ENTRIES 128 // compared to MAX_PAGE_ENTRY_NUM, this is more of a software constraint
-
+// for meta info array in scheduler
 #define MAX_TREE_LEVEL 32
 
+// object related info
 #define OBJ_BYTES 20 // 20 bytes (1 * id + 4 * boundary)
 #define OBJ_BITS (OBJ_BYTES * 8) // 20 bytes (1 * id + 4 * boundary)
 #define N_OBJ_PER_AXI 3 // 64 bytes can accommodate 3 objects 
 
-#define MAX_PAGE_ENTRY_NUM 10000 // maximum number of entries per page for a join PE
+// For hardware, maximum number of entries per page for a join PE
+//   each obj_t will be treat as 5 arrays in HLS, each with 4 byte elements
+//   	BRAM18Kbit -> 4096 x int
+//   this supports 4096 objects * 20 bytes ~= 80 KB page size
+#define MAX_PAGE_ENTRY_NUM 4096 
