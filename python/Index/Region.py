@@ -30,3 +30,7 @@ class MBR:
             return True
         else:
             return False
+    
+    def print(self):
+        print("low 0: {}\thigh 0:{}\tlow 1: {}\thigh 1:{}".format(
+            self.low0, self.high0, self.low1, self.high1))

@@ -28,7 +28,9 @@ class Node:
         print("MBR of the node: ", self.mbr)
         print("Children pointers: ", self.child_ptrs)
         print("Object IDs: ", self.obj_ids)
-        print("Children MBR list: ", self.mbrs)
+        print("Children MBR list: ")
+        for mbr in self.mbrs:
+            mbr.print()
 
     def get_count(self):
         return self.count
@@ -53,6 +55,16 @@ class Node:
             self.mbrs.append(mbr)
         self.count += len(data)
 
+    def deep_copy(self):
+        new_node = Node(node_id=self.node_id, is_leaf=self.is_leaf, mbr=self.mbr)
+        if self.is_leaf:
+            new_node.add_entries(self.mbrs, self.obj_ids)
+        else: 
+            # recursively call deep copy on the children
+            for child_ptr in self.child_ptrs:
+                new_child = child_ptr.deep_copy()
+                new_node.add_entry(new_child.mbr, new_child)
+        return new_node
 
 def sync_traversal(root_A, root_B):
     """
@@ -86,8 +98,9 @@ def join_nodes_recursive(node_A, node_B, results: list):
         for i in range(node_A.get_count()):
             for j in range(node_B.get_count()):
                 if node_A.mbrs[i].intersects(node_B.mbrs[j]):
-                    if node_A.obj_ids[i] != node_B.obj_ids[j]:
-                        results.append((node_A.obj_ids[i], node_B.obj_ids[j]))
+                    # here, we assume tree A and B has different object id spaces,
+                    #   so the IDs need not to be different
+                    results.append((node_A.obj_ids[i], node_B.obj_ids[j]))
     else: # neither is leaf
         for i in range(node_A.get_count()):
             for j in range(node_B.get_count()):

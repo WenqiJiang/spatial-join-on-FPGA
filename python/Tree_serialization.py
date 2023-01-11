@@ -11,14 +11,14 @@ from Index.Tree_generation import generate_rtree, collect_all_nodes, index_seria
 if __name__ == '__main__':
 
     print("\n\nRunning serialization on generated R trees:")
-    max_level = 1
+    max_level = 4
     directory_node_fanout = 8
     data_node_fanout = 16
     root = generate_rtree(max_level=max_level, directory_node_fanout=directory_node_fanout, data_node_fanout=data_node_fanout, root_mbr=None)
 
-
     results = sync_traversal(root, root)
     print("Result length: {}".format(len(results)))
+    # root.print_contents()
 
     candidate_node_list = collect_all_nodes(root)
     print("Node list length: {}".format(len(candidate_node_list)))
@@ -28,5 +28,8 @@ if __name__ == '__main__':
 
     print("Loading the index from disk, and join again: ")
     root_loaded = load_serialized_index(fname)
-    results = sync_traversal(root, root)
+    # root_loaded.print_contents()
+
+    results = sync_traversal(root, root_loaded)
+    # results = sync_traversal(root, root_loaded.deep_copy())
     print("Result length: {}".format(len(results)))

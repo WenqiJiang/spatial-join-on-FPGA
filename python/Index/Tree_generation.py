@@ -179,11 +179,11 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
                     child_id = i * 3 + j
                     if child_id >= node.count:
                         break
-                    node_bin += int(node.obj_ids[i]).to_bytes(4, "little", signed=False)
-                    node_bin += pack('<f', node.mbrs[i].get_low0())
-                    node_bin += pack('<f', node.mbrs[i].get_high0())
-                    node_bin += pack('<f', node.mbrs[i].get_low1())
-                    node_bin += pack('<f', node.mbrs[i].get_high1())
+                    node_bin += int(node.obj_ids[child_id]).to_bytes(4, "little", signed=False)
+                    node_bin += pack('<f', node.mbrs[child_id].get_low0())
+                    node_bin += pack('<f', node.mbrs[child_id].get_high0())
+                    node_bin += pack('<f', node.mbrs[child_id].get_low1())
+                    node_bin += pack('<f', node.mbrs[child_id].get_high1())
                 node_bin += (AXI_bytes - 3 * obj_bytes) * empty_byte
         # for directory node, fill id as children node id
         else: # is directory
@@ -196,11 +196,11 @@ def index_serialization(root, node_bytes=4096, out_dir=None):
                     child_id = i * 3 + j
                     if child_id >= node.count:
                         break
-                    node_bin += int(node.child_ptrs[i].node_id).to_bytes(4, "little", signed=False)
-                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_low0())
-                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_high0())
-                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_low1())
-                    node_bin += pack('<f', node.child_ptrs[i].mbr.get_high1())
+                    node_bin += int(node.child_ptrs[child_id].node_id).to_bytes(4, "little", signed=False)
+                    node_bin += pack('<f', node.child_ptrs[child_id].mbr.get_low0())
+                    node_bin += pack('<f', node.child_ptrs[child_id].mbr.get_high0())
+                    node_bin += pack('<f', node.child_ptrs[child_id].mbr.get_low1())
+                    node_bin += pack('<f', node.child_ptrs[child_id].mbr.get_high1())
                 node_bin += (AXI_bytes - 3 * obj_bytes) * empty_byte
 
         # final assertion & padding
@@ -252,18 +252,17 @@ def load_serialized_index(in_dir, node_bytes=4096):
         mbr = MBR(low0, high0, low1, high1)
 
         node = Node(node_id, is_leaf, mbr)
-        node.count = count
 
         # handle all the children
-        for i in range(int(np.ceil(node.count / 3.0))):
+        for i in range(int(np.ceil(count / 3.0))):
             # append 3 objects, then fill 4 bytes
             for j in range(3):
                 child_id = i * 3 + j
                 child_id_addr = 64 + 64 * i + 20 * j
-                if child_id >= node.count:
+                if child_id >= count:
                     break
 
-                id = unpack_from("<i", node_bin, offset=child_id_addr)
+                id = unpack_from("<i", node_bin, offset=child_id_addr)[0]
                 low0 = unpack_from("<f", node_bin, offset=child_id_addr + 4)[0]
                 high0 = unpack_from("<f", node_bin, offset=child_id_addr + 8)[0]
                 low1 = unpack_from("<f", node_bin, offset=child_id_addr + 12)[0]
@@ -271,6 +270,8 @@ def load_serialized_index(in_dir, node_bytes=4096):
                 mbr = MBR(low0, high0, low1, high1)
                 
                 node.add_entry(mbr, id)
+
+        assert node.count == count 
 
         return node
 

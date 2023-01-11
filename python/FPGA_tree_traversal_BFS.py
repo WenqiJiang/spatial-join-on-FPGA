@@ -88,8 +88,9 @@ class FPGA_tree_traversal_BFS:
             for i in range(node_A.get_count()):
                 for j in range(node_B.get_count()):
                     if node_A.mbrs[i].intersects(node_B.mbrs[j]):
-                        if node_A.obj_ids[i] != node_B.obj_ids[j]:
-                            results.append((node_A.obj_ids[i], node_B.obj_ids[j]))
+                        # here, we assume tree A and B has different object id spaces,
+                        #   so the IDs need not to be different
+                        results.append((node_A.obj_ids[i], node_B.obj_ids[j]))
         elif node_A.is_leaf and not node_B.is_leaf: # result pairs: A and B's children
             for j in range(node_B.get_count()):
                 if node_A.mbr.intersects(node_B.mbrs[j]):
