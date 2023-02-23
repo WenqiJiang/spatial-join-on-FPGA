@@ -42,12 +42,13 @@ void read_nodes(
     const ap_uint<512>* in_pages_A,
     const ap_uint<512>* in_pages_B,
     hls::stream<pair_t>& axis_page_ID_pair_read_nodes,
+    hls::stream<int>& axis_join_PE_ID,
     hls::stream<int>& s_join_finish_in,
     // output
-    hls::stream<node_meta_t>& s_meta_A,
-    hls::stream<node_meta_t>& s_meta_B,
-    hls::stream<obj_t>& s_page_A,
-    hls::stream<obj_t>& s_page_B,
+    hls::stream<node_meta_t> (&s_meta_A)[N_JOIN_PE],
+    hls::stream<node_meta_t> (&s_meta_B)[N_JOIN_PE],
+    hls::stream<obj_t> (&s_page_A)[N_JOIN_PE],
+    hls::stream<obj_t> (&s_page_B)[N_JOIN_PE],
     hls::stream<int>& s_join_finish_out
     ) {
 
@@ -56,6 +57,8 @@ void read_nodes(
     while (true) {
 
         if (!axis_page_ID_pair_read_nodes.empty()) {
+
+            int join_PE_ID = block_read<int>(axis_join_PE_ID);
 
             pair_t page_ID_pair = block_read<pair_t>(axis_page_ID_pair_read_nodes);
             int page_ID_A = page_ID_pair.id_A;
@@ -70,8 +73,8 @@ void read_nodes(
             start_addr_A++;
             start_addr_B++;
 
-            s_meta_A.write(meta_A);
-            s_meta_B.write(meta_B);
+            s_meta_A[join_PE_ID].write(meta_A);
+            s_meta_B[join_PE_ID].write(meta_B);
             
             int max_page_entries = meta_A.count >= meta_B.count? meta_A.count : meta_B.count;
             // number of 512-bit entries that a page contains 
@@ -106,7 +109,7 @@ void read_nodes(
                     obj_A.low1 = *((float*) (&low1_A_ap_uint_32)); 
                     obj_A.high1 = *((float*) (&high1_A_ap_uint_32)); 
                     if (i * N_OBJ_PER_AXI + j < meta_A.count) {
-                        s_page_A.write(obj_A);
+                        s_page_A[join_PE_ID].write(obj_A);
                     }
 
                     // Page B
@@ -128,7 +131,7 @@ void read_nodes(
                     obj_B.low1 = *((float*) (&low1_B_ap_uint_32)); 
                     obj_B.high1 = *((float*) (&high1_B_ap_uint_32)); 
                     if (i * N_OBJ_PER_AXI + j < meta_B.count) {
-                        s_page_B.write(obj_B);
+                        s_page_B[join_PE_ID].write(obj_B);
                     }
                 }
             }
@@ -150,12 +153,13 @@ void layer_cache_memory_controller(
     //   memory 
     ap_uint<64>* layer_cache,
     //   from join PE
-    hls::stream<int>& s_intersect_count_directory, 
-    hls::stream<result_t>& s_result_pair_directory,
+    hls::stream<int> (&s_intersect_count_directory)[N_JOIN_PE], 
+    hls::stream<result_t> (&s_result_pair_directory)[N_JOIN_PE],
     //   from scheduler
     hls::stream<int>& axis_read_write_control, // 0 -> read from memory; 1 -> write to memory 
     hls::stream<int>& axis_layer_cache_read_addr, 
     hls::stream<int>& axis_layer_cache_write_addr, 
+    hls::stream<int>& axis_num_layer_pairs, // number of pairs to join in this layer
     hls::stream<int>& s_join_finish_in,
     // output
     //   to scheduler
@@ -171,51 +175,74 @@ void layer_cache_memory_controller(
     ap_uint<64> root_ap_uint_64 = pack_pair(root_pair);
     layer_cache[0] = root_ap_uint_64; 
 
+
     // Order:
-    //   1. receive a signal from the scheduler: indicating whether it wants to write to / read from memory
-    //   If it is a write:
-    //      a. receive cache layer id from the scheduler
-    //      b. receive the layer cache results from the join PE, write to memory
-    //   If it is a read:
-    //      a. receive the read layer id and the pointer, read it from memory
-    //      b. write the pair back to the scheduler
-    
-    while (true) {
+    //   1. For each layer, read the write control signal, the write address, and the total
+    //        number of pairs in the layer
+    //   2. Loop over the join PEs to collect results; check read cache request regularly; 
+    //        end the loop if the number of last signal by join PE == number of pairs in the layer
 
-        if (!axis_read_write_control.empty()) {
+    // non-leaf join, write to the layer cache 
+    for (int current_level = 1; current_level < max_level + 1; current_level++) {
 
-            // 0 -> read from memory; 1 -> write to memory 
-            int write = block_read<int>(axis_read_write_control);
+        // number of pairs to process in the layer
+        int num_layer_pairs = block_read<int>(axis_num_layer_pairs);
 
-            if (write) {
-                int start_addr = block_read<int>(axis_layer_cache_write_addr);
+        // write signal and address
+        int write_signal = block_read<int>(axis_read_write_control); // should be 1 -> write
+        int write_start_addr = block_read<int>(axis_layer_cache_write_addr);
+        int write_count = 0;
+        int last_count = 0; // number of page joins finished
+        bool break_while = false;
 
-                int local_count = 0; // same functionality as s_intersect_count_leaf
-                while (true) {
-                    // for each pair of page join, there'll be a last signal sent
-                    result_t result = s_result_pair_directory.read();
-                    if (result.last) {
-                        break;
-                    } else {
-                        ap_uint<64> result_ap_uint_64 = pack_pair(result.pair);
-                        layer_cache[start_addr + local_count] = result_ap_uint_64;
-                        local_count++;
-                    }
-                }
-                int count = s_intersect_count_directory.read(); 
-                axis_intersect_count_directory_scheduler.write(count);
-            } else { // read 
+        while (true) {
+
+            if (break_while) {
+                break;
+            }
+
+            // read signal arrives
+            else if (!axis_read_write_control.empty()) { 
+                int read_signal = block_read<int>(axis_read_write_control); // should be 0 -> read
                 int addr = block_read<int>(axis_layer_cache_read_addr);
-
                 pair_t next_page_pair = unpack_pair(layer_cache[addr]);
                 axis_page_pair_scheduler.write(next_page_pair);
+            } 
+
+            // write to memory by loading content from join PEs
+            else { 
+
+                // chech all PEs in a round-robin manner
+                for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
+
+                    if (!s_result_pair_directory[PE_id].empty()) {
+
+                        result_t result = s_result_pair_directory[PE_id].read();
+
+                        if (result.last) {
+                            int tmp_count = s_intersect_count_directory[PE_id].read(); 
+                            last_count++;
+                            if (last_count == num_layer_pairs) {
+                                break_while = true; 
+                            }
+                        } else {
+                            ap_uint<64> result_ap_uint_64 = pack_pair(result.pair);
+                            layer_cache[write_start_addr + write_count] = result_ap_uint_64;
+                            write_count++;
+                        }
+                    }
+                }
             }
-        } else if (!s_join_finish_in.empty()) {
-            int end = s_join_finish_in.read();
-            s_join_finish_out.write(end);
-            break;
-        } 
+        }
+
+        // write the total number of pairs in this layer
+        if (current_level < max_level) {    
+            axis_intersect_count_directory_scheduler.write(write_count);
+        }
     }
+
+    int end = s_join_finish_in.read();
+    s_join_finish_out.write(end);
 }
 
 
@@ -224,8 +251,8 @@ void layer_cache_memory_controller(
 void write_results(
     // input
     //   from join PE
-    hls::stream<int>& s_intersect_count_leaf, // per page pair
-    hls::stream<result_t>& s_result_pair_leaf,
+    hls::stream<int> (&s_intersect_count_leaf)[N_JOIN_PE], // per page pair
+    hls::stream<result_t> (&s_result_pair_leaf)[N_JOIN_PE],
     //   from the scheduler
     hls::stream<int>& s_join_finish_in,  // final end signal 
     // out
@@ -233,37 +260,50 @@ void write_results(
     //                while the rest are intersect ID pairs
     ap_uint<64>* out_intersect) {
 
-    ap_uint<64> total_intersect_count = 0;
+    ap_uint<64> total_intersect_count = 0; 
     const int bias = 1; // the first number writes total intersection count
 
     while (true) {
 
-        // if data is available, finish writing results of a pair of node join
-        if (!s_result_pair_leaf.empty()) {
-            
-            int local_count = 0; // same functionality as s_intersect_count_leaf
-            while (true) {
-                // for each pair of page join, there'll be a last signal sent
-                result_t result = s_result_pair_leaf.read();
+        bool has_content = false; // whether any PE has results in this round
+
+        // loop over join PEs to read results
+        for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
+
+            // for each pair of page join, there'll be a last signal sent
+            if (!s_result_pair_leaf[PE_id].empty()) {
+
+                has_content = true; 
+                result_t result = s_result_pair_leaf[PE_id].read();
                 if (result.last) {
-                    break;
+                    int tmp_count = s_intersect_count_leaf[PE_id].read(); 
                 } else {
                     ap_uint<64> result_ap_uint_64 = pack_pair(result.pair);
-                    out_intersect[total_intersect_count + local_count + bias] = result_ap_uint_64;
-                    local_count++;
+                    out_intersect[total_intersect_count + bias] = result_ap_uint_64;
+                    total_intersect_count++;
                 }
             }
-            total_intersect_count += s_intersect_count_leaf.read(); 
-        } 
-        // the entire join is finished
-        else if (!s_join_finish_in.empty()) {
-            int end = s_join_finish_in.read();
-            break;
         }
-        
+
+        // check whether the entire join is finished
+        if (!has_content && !s_join_finish_in.empty()) {
+
+            bool has_content_recheck = false; // whether any PE has results in this round
+
+            // loop over the FIFOs to double check if there's any content
+            for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
+                if (!s_result_pair_leaf[PE_id].empty()) {
+                    has_content_recheck = true; 
+                    break;
+                }
+            }
+            if (!has_content_recheck) {
+                int end = s_join_finish_in.read();
+                break;
+            }
+        }
     }
 
     // write the number of intersection in the first address
     out_intersect[0] = total_intersect_count;
-    
 }

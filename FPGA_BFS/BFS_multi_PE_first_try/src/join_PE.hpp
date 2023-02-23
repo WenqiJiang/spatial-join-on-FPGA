@@ -99,12 +99,15 @@ void join_page(
                 result.last = true;
                 if (meta_A.is_leaf && meta_B.is_leaf) {
                     s_result_pair_leaf.write(result);
-                } else {
-                    s_result_pair_directory.write(result);
-                }
+                } 
+                // write a dummy last to cache manager even if both are leaves
+                s_result_pair_directory.write(result);
+
                 // write count
                 if (meta_A.is_leaf && meta_B.is_leaf) {
                     s_intersect_count_leaf.write(intersect_count);
+                     // write a dummy count to cache manager even if both are leaves
+                    s_intersect_count_directory.write(0);
                 } else {
                     s_intersect_count_directory.write(intersect_count);
                 }
