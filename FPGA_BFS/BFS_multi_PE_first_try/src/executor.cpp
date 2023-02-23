@@ -7,6 +7,8 @@ extern "C" {
 
 void executor(  
     ///// input /////
+    int max_level_A,
+    int max_level_B,
     int root_id_A,
     int root_id_B,
     int page_bytes,
@@ -164,7 +166,11 @@ void executor(
             s_finish_join_PE_out[PE_id]
         );
     }
-
+    
+    aggregate_join_PE_idle(
+        s_join_PE_idle,
+        axis_idle_join_PE_ID);
+        
     aggregate_finish_signals<N_JOIN_PE>(
         s_finish_join_PE_out,
         s_finish_join_PE_out_aggregated);
@@ -172,6 +178,8 @@ void executor(
     layer_cache_memory_controller(
         // input
         //   argument
+        max_level_A,
+        max_level_B,
         root_id_A,
         root_id_B,
         //   memory 

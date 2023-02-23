@@ -47,7 +47,7 @@ void pass_termination_signal(
 }
 
 void aggregate_join_PE_idle(
-    hls::stream<int> (&s_join_PE_idle[N_JOIN_PE]),  // write a signal (1) once a join finishes
+    hls::stream<int> (&s_join_PE_idle)[N_JOIN_PE],  // write a signal (1) once a join finishes
     hls::stream<int>& axis_idle_join_PE_ID 
 ) {
     while (true) {

@@ -149,13 +149,15 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_scheduler.setArg(0, int(max_level_A)));
     OCL_CHECK(err, err = krnl_scheduler.setArg(1, int(max_level_B)));
 
-    OCL_CHECK(err, err = krnl_executor.setArg(0, int(root_id_A)));
-    OCL_CHECK(err, err = krnl_executor.setArg(1, int(root_id_B)));
-    OCL_CHECK(err, err = krnl_executor.setArg(2, int(page_bytes)));
-    OCL_CHECK(err, err = krnl_executor.setArg(8, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_executor.setArg(9, buffer_in_pages_B));
-    OCL_CHECK(err, err = krnl_executor.setArg(12, buffer_layer_cache));
-    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_out));
+    OCL_CHECK(err, err = krnl_executor.setArg(0, int(max_level_A)));
+    OCL_CHECK(err, err = krnl_executor.setArg(1, int(max_level_B)));
+    OCL_CHECK(err, err = krnl_executor.setArg(2, int(root_id_A)));
+    OCL_CHECK(err, err = krnl_executor.setArg(3, int(root_id_B)));
+    OCL_CHECK(err, err = krnl_executor.setArg(4, int(page_bytes)));
+    OCL_CHECK(err, err = krnl_executor.setArg(10, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_executor.setArg(11, buffer_in_pages_B));
+    OCL_CHECK(err, err = krnl_executor.setArg(14, buffer_layer_cache));
+    OCL_CHECK(err, err = krnl_executor.setArg(15, buffer_out));
 
 
     // Copy input data to device global memory

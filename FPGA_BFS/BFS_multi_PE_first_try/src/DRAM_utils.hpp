@@ -148,6 +148,8 @@ void read_nodes(
 void layer_cache_memory_controller(
     // input
     //   argument
+    int max_level_A,
+    int max_level_B,
     int root_id_A,
     int root_id_B,
     //   memory 
@@ -168,6 +170,8 @@ void layer_cache_memory_controller(
     hls::stream<int>& s_join_finish_out
 ) {
 
+    int max_level = max_level_A > max_level_B ? max_level_A: max_level_B;
+    
     // Initialization: write the pair (rootA, rootB) in layer cache 0
     pair_t root_pair;
     root_pair.id_A = root_id_A;
