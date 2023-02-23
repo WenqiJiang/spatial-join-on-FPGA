@@ -13,6 +13,8 @@ void join_page(
     hls::stream<obj_t>& s_page_B,
     hls::stream<int>& s_join_finish_in,
     // output
+    //   for scheduler:
+    hls::stream<int>& s_join_PE_idle,  // write a signal (1) once a join finishes
     //   for directory nodes: 
     hls::stream<int>& s_intersect_count_directory, // per page pair
     hls::stream<result_t>& s_result_pair_directory,
@@ -168,7 +170,11 @@ void join_page(
                 // write count
                 s_intersect_count_directory.write(intersect_count);
             }
-        } else if (!s_join_finish_in.empty()) {
+            // write an idle signal once the page join is finished
+            s_join_PE_idle.write(1);
+        } 
+        
+        else if (!s_join_finish_in.empty()) {
             int end = s_join_finish_in.read();
             s_join_finish_out.write(end);
             break;

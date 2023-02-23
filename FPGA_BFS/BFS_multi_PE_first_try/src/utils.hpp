@@ -45,3 +45,44 @@ void pass_termination_signal(
     int end = block_read<int>(axis_join_finish);
     s_join_finish_replicated.write(end);
 }
+
+void aggregate_join_PE_idle(
+    hls::stream<int> (&s_join_PE_idle[N_JOIN_PE]),  // write a signal (1) once a join finishes
+    hls::stream<int>& axis_idle_join_PE_ID 
+) {
+    while (true) {
+        for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
+            if (!s_join_PE_idle[PE_id].empty()) {
+                int tmp_idle = s_join_PE_idle[PE_id].read();
+                axis_idle_join_PE_ID.write(PE_id);
+            }
+        }
+    }
+}
+
+template<int n_in>
+void aggregate_finish_signals(
+    hls::stream<int> (&s_join_finish_in)[n_in],
+    hls::stream<int> &s_join_finish_out) {
+    // wait for a bunch of join signal to arrive,  
+    //  then write a signal indicate all of them are finished
+    int finish = 0;
+    for (int i = 0; i < n_in; i++) {
+        finish = s_join_finish_in[i].read();
+    }
+
+    s_join_finish_out.write(finish);
+}
+
+
+template<int n_out>
+void broadcast_finish_signals(
+    hls::stream<int> &s_join_finish_in,
+    hls::stream<int> (&s_join_finish_out)[n_out]) {
+    // broadcast a finish signal
+
+    int finish = s_join_finish_in.read();
+    for (int i = 0; i < n_out; i++) {
+        s_join_finish_out[i].write(finish);
+    }
+}
