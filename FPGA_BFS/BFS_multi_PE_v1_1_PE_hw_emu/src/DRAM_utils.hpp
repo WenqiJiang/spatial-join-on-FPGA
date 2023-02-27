@@ -49,7 +49,9 @@ void read_nodes(
     hls::stream<node_meta_t> (&s_meta_B)[N_JOIN_PE],
     hls::stream<obj_t> (&s_page_A)[N_JOIN_PE],
     hls::stream<obj_t> (&s_page_B)[N_JOIN_PE],
-    hls::stream<int>& s_join_finish_out
+    hls::stream<int>& s_join_finish_out,
+
+    hls::stream<int>& axis_debug_read_PE_finish
     ) {
 
     const int page_size_per_axi = page_bytes / 64; 
@@ -142,6 +144,7 @@ void read_nodes(
         }  
     }
 
+    axis_debug_read_PE_finish.write(1);
 }
 
 
@@ -167,7 +170,9 @@ void layer_cache_memory_controller(
     //   to scheduler
     hls::stream<pair_t>& axis_page_pair_scheduler,      // for read request, return pair
     hls::stream<int>& axis_intersect_count_directory_scheduler, // for write request, return count
-    hls::stream<int>& s_join_finish_out
+    hls::stream<int>& s_join_finish_out,
+
+    hls::stream<int>& axis_debug_cache_manager_finish
 ) {
 
     int max_level = max_level_A > max_level_B ? max_level_A: max_level_B;
@@ -247,6 +252,7 @@ void layer_cache_memory_controller(
 
     int end = s_join_finish_in.read();
     s_join_finish_out.write(end);
+    axis_debug_cache_manager_finish.write(1);
 }
 
 
@@ -262,14 +268,18 @@ void write_results(
     // out
     //    out format: the first number writes total intersection count, 
     //                while the rest are intersect ID pairs
-    ap_uint<64>* out_intersect) {
+    ap_uint<64>* out_intersect,
+    
+    hls::stream<int>& axis_debug_write_PE_finish
+    ) {
 
     ap_uint<64> total_intersect_count = 0; 
     const int bias = 1; // the first number writes total intersection count
 
     while (true) {
 
-        bool has_content = false; // whether any PE has results in this round
+        // whether any PE has results in this round, used for finish detection
+        bool has_content = false; 
 
         // loop over join PEs to read results
         for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
@@ -310,4 +320,5 @@ void write_results(
 
     // write the number of intersection in the first address
     out_intersect[0] = total_intersect_count;
+    axis_debug_write_PE_finish.write(1);
 }

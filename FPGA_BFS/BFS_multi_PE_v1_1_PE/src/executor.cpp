@@ -113,6 +113,9 @@ void executor(
     hls::stream<int> s_finish_join_PE_out_aggregated; 
 #pragma HLS stream variable=s_finish_join_PE_out_aggregated depth=2
 
+    hls::stream<int> s_finish_aggregate_join_idle_out; 
+#pragma HLS stream variable=s_finish_aggregate_join_idle_out depth=2
+
     hls::stream<int> s_finish_layer_cache_out; 
 #pragma HLS stream variable=s_finish_layer_cache_out depth=2
 
@@ -166,14 +169,16 @@ void executor(
             s_finish_join_PE_out[PE_id]
         );
     }
-    
-    aggregate_join_PE_idle(
-        s_join_PE_idle,
-        axis_idle_join_PE_ID);
-        
+   
     aggregate_finish_signals<N_JOIN_PE>(
         s_finish_join_PE_out,
-        s_finish_join_PE_out_aggregated);
+        s_finish_join_PE_out_aggregated); 
+    aggregate_join_PE_idle(
+        s_join_PE_idle,
+        axis_idle_join_PE_ID,
+        s_finish_join_PE_out_aggregated,
+        s_finish_aggregate_join_idle_out);
+        
 
     layer_cache_memory_controller(
         // input
@@ -192,7 +197,7 @@ void executor(
         axis_layer_cache_read_addr, 
         axis_layer_cache_write_addr, 
         axis_num_layer_pairs,
-        s_finish_join_PE_out_aggregated,
+        s_finish_aggregate_join_idle_out,
         // output
         //   to scheduler
         axis_page_pair_scheduler,      // for read request, return pair

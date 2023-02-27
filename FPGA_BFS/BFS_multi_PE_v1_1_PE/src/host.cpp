@@ -18,6 +18,11 @@ string dir_concat(string dir1, string dir2) {
     return dir1 + dir2;
 }
 
+void wait_for_enter(const std::string &msg) {
+    std::cout << msg << std::endl;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
 int main(int argc, char** argv)
 {
     cl_int err;
@@ -154,10 +159,10 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_executor.setArg(2, int(root_id_A)));
     OCL_CHECK(err, err = krnl_executor.setArg(3, int(root_id_B)));
     OCL_CHECK(err, err = krnl_executor.setArg(4, int(page_bytes)));
-    OCL_CHECK(err, err = krnl_executor.setArg(10, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_executor.setArg(11, buffer_in_pages_B));
-    OCL_CHECK(err, err = krnl_executor.setArg(14, buffer_layer_cache));
-    OCL_CHECK(err, err = krnl_executor.setArg(15, buffer_out));
+    OCL_CHECK(err, err = krnl_executor.setArg(12, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_in_pages_B));
+    OCL_CHECK(err, err = krnl_executor.setArg(17, buffer_layer_cache));
+    OCL_CHECK(err, err = krnl_executor.setArg(18, buffer_out));
 
 
     // Copy input data to device global memory
@@ -170,6 +175,7 @@ int main(int argc, char** argv)
         },0/* 0 means from host*/));
     q.finish();
 
+    // wait_for_enter("\nPress ENTER to continue after setting up ILA trigger...");
     cout << "Launching kernel...\n";
     // Launch the Kernel
     auto start = chrono::high_resolution_clock::now();

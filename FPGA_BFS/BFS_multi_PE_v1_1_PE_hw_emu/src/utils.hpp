@@ -48,7 +48,10 @@ void pass_termination_signal(
 
 void aggregate_join_PE_idle(
     hls::stream<int> (&s_join_PE_idle)[N_JOIN_PE],  // write a signal (1) once a join finishes
-    hls::stream<int>& axis_idle_join_PE_ID 
+    hls::stream<int>& axis_idle_join_PE_ID,
+    hls::stream<int> &s_join_finish_in,
+    hls::stream<int> &s_join_finish_out,
+    hls::stream<int>& axis_debug_aggregate_idle_finish
 ) {
     while (true) {
         for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
@@ -57,13 +60,20 @@ void aggregate_join_PE_idle(
                 axis_idle_join_PE_ID.write(PE_id);
             }
         }
+        if (!s_join_finish_in.empty()) {
+            int end = s_join_finish_in.read();
+            s_join_finish_out.write(end);
+            break;
+        }
     }
+    axis_debug_aggregate_idle_finish.write(1);
 }
 
 template<int n_in>
 void aggregate_finish_signals(
     hls::stream<int> (&s_join_finish_in)[n_in],
-    hls::stream<int> &s_join_finish_out) {
+    hls::stream<int> &s_join_finish_out,
+    hls::stream<int>& axis_debug_join_PE_finish) {
     // wait for a bunch of join signal to arrive,  
     //  then write a signal indicate all of them are finished
     int finish = 0;
@@ -72,6 +82,7 @@ void aggregate_finish_signals(
     }
 
     s_join_finish_out.write(finish);
+    axis_debug_join_PE_finish.write(1);
 }
 
 
