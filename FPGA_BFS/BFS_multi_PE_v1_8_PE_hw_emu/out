@@ -11,10 +11,10 @@ Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
 INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
 	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/scheduler.hw_emu
 	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/logs/scheduler.hw_emu
-Running Dispatch Server on port: 35081
-INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/scheduler.hw_emu.xo.compile_summary, at Mon Feb 27 13:26:58 2023
-INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 13:26:58 2023
-INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/scheduler.hw_emu/v++_compile_scheduler.hw_emu_guidance.html', at Mon Feb 27 13:27:00 2023
+Running Dispatch Server on port: 38215
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/scheduler.hw_emu.xo.compile_summary, at Mon Feb 27 15:45:43 2023
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 15:45:43 2023
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/scheduler.hw_emu/v++_compile_scheduler.hw_emu_guidance.html', at Mon Feb 27 15:45:45 2023
 INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
 INFO: [v++ 74-78] Compiler Version string: 2022.1
@@ -56,7 +56,7 @@ INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial
 INFO: [v++ 60-586] Created xclbin/scheduler.hw_emu.xo
 INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
     vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/scheduler.hw_emu.xo.compile_summary 
-INFO: [v++ 60-791] Total elapsed time: 0h 1m 4s
+INFO: [v++ 60-791] Total elapsed time: 0h 1m 5s
 INFO: [v++ 60-1653] Closing dispatch client.
 mkdir -p ./xclbin
 v++ -g -t hw_emu --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config scheduler.cfg -c -k executor --temp_dir ./_x.hw_emu -o xclbin/executor.hw_emu.xo src/executor.cpp
@@ -69,10 +69,10 @@ Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
 INFO: [v++ 60-1306] Additional information associated with this v++ compile can be found at:
 	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/executor.hw_emu
 	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/logs/executor.hw_emu
-Running Dispatch Server on port: 42581
-INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/executor.hw_emu.xo.compile_summary, at Mon Feb 27 13:28:04 2023
-INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 13:28:04 2023
-INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/executor.hw_emu/v++_compile_executor.hw_emu_guidance.html', at Mon Feb 27 13:28:06 2023
+Running Dispatch Server on port: 37749
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/executor.hw_emu.xo.compile_summary, at Mon Feb 27 15:46:51 2023
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 15:46:51 2023
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/executor.hw_emu/v++_compile_executor.hw_emu_guidance.html', at Mon Feb 27 15:46:52 2023
 INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
 INFO: [v++ 74-78] Compiler Version string: 2022.1
@@ -90,8 +90,8 @@ INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_9_1'.
 INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_9_1'
 INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_87_2'.
 INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 3, Depth = 5, loop 'VITIS_LOOP_87_2'
-INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_96_1'.
-INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 2, loop 'VITIS_LOOP_96_1'
+INFO: [v++ 204-61] Pipelining loop 'VITIS_LOOP_97_1'.
+INFO: [v++ 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 2, loop 'VITIS_LOOP_97_1'
 INFO: [v++ 204-61] Pipelining loop 'LOAD_PAGE'.
 INFO: [v++ 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'LOAD_PAGE'
 INFO: [v++ 204-61] Pipelining loop 'LOOP_C'.
@@ -174,7 +174,7 @@ INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial
 INFO: [v++ 60-586] Created xclbin/executor.hw_emu.xo
 INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
     vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/executor.hw_emu.xo.compile_summary 
-INFO: [v++ 60-791] Total elapsed time: 0h 3m 4s
+INFO: [v++ 60-791] Total elapsed time: 0h 3m 2s
 INFO: [v++ 60-1653] Closing dispatch client.
 mkdir -p ./xclbin
 v++ -g -t hw_emu --platform xilinx_u250_gen3x16_xdma_4_1_202210_1 --save-temps --config vivado.cfg -l --temp_dir ./_x.hw_emu -o xclbin/vadd.hw_emu.xclbin xclbin/scheduler.hw_emu.xo xclbin/executor.hw_emu.xo # 
@@ -187,29 +187,29 @@ Option Map File Used: '/tools/Xilinx/Vitis/2022.1/data/vitis/vpp/optMap.xml'
 INFO: [v++ 60-1306] Additional information associated with this v++ link can be found at:
 	Reports: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/link
 	Log files: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/logs/link
-Running Dispatch Server on port: 41157
-INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin.link_summary, at Mon Feb 27 13:31:11 2023
-INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 13:31:11 2023
-INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/link/v++_link_vadd.hw_emu_guidance.html', at Mon Feb 27 13:31:12 2023
+Running Dispatch Server on port: 39569
+INFO: [v++ 60-1548] Creating build summary session with primary output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin.link_summary, at Mon Feb 27 15:49:55 2023
+INFO: [v++ 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 15:49:55 2023
+INFO: [v++ 60-1315] Creating rulecheck session with output '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/link/v++_link_vadd.hw_emu_guidance.html', at Mon Feb 27 15:49:57 2023
 INFO: [v++ 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
 INFO: [v++ 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw_emu/hw_emu.xsa'
 INFO: [v++ 74-78] Compiler Version string: 2022.1
 INFO: [v++ 60-629] Linking for hardware emulation target
 INFO: [v++ 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
 INFO: [v++ 60-1332] Run 'run_link' status: Not started
-INFO: [v++ 60-1443] [13:31:23] Run run_link: Step system_link: Started
+INFO: [v++ 60-1443] [15:50:07] Run run_link: Step system_link: Started
 INFO: [v++ 60-1453] Command Line: system_link --xo /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/scheduler.hw_emu.xo --xo /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/executor.hw_emu.xo -keep --config /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/syslinkConfig.ini --xpfm /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm --target emu --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
-INFO: [SYSTEM_LINK 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 13:31:25 2023
+INFO: [SYSTEM_LINK 60-1316] Initiating connection to rulecheck server, at Mon Feb 27 15:50:09 2023
 INFO: [SYSTEM_LINK 82-70] Extracting xo v3 file /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/scheduler.hw_emu.xo
 INFO: [SYSTEM_LINK 82-70] Extracting xo v3 file /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/executor.hw_emu.xo
 INFO: [SYSTEM_LINK 82-53] Creating IP database /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml
-INFO: [SYSTEM_LINK 82-38] [13:31:31] build_xd_ip_db started: /tools/Xilinx/Vitis/2022.1/bin/build_xd_ip_db -ip_search 0  -sds-pf /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/hw_emu.hpfm -clkid 0 -ip /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/iprepo/xilinx_com_hls_executor_1_0,executor -ip /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/iprepo/xilinx_com_hls_scheduler_1_0,scheduler -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml
-INFO: [SYSTEM_LINK 82-37] [13:31:39] build_xd_ip_db finished successfully
-Time (s): cpu = 00:00:08 ; elapsed = 00:00:08 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 182275 ; free virtual = 302885
+INFO: [SYSTEM_LINK 82-38] [15:50:14] build_xd_ip_db started: /tools/Xilinx/Vitis/2022.1/bin/build_xd_ip_db -ip_search 0  -sds-pf /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/hw_emu.hpfm -clkid 0 -ip /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/iprepo/xilinx_com_hls_scheduler_1_0,scheduler -ip /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/iprepo/xilinx_com_hls_executor_1_0,executor -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml
+INFO: [SYSTEM_LINK 82-37] [15:50:23] build_xd_ip_db finished successfully
+Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 180077 ; free virtual = 302995
 INFO: [SYSTEM_LINK 82-51] Create system connectivity graph
 INFO: [SYSTEM_LINK 82-102] Applying explicit connections to the system connectivity graph: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml
-INFO: [SYSTEM_LINK 82-38] [13:31:39] cfgen started: /tools/Xilinx/Vitis/2022.1/bin/cfgen  -nk executor:1:executor_1 -nk scheduler:1:scheduler_1 -sc executor_1.axis_idle_join_PE_ID:scheduler_1.axis_idle_join_PE_ID:64 -sc executor_1.axis_page_pair_scheduler:scheduler_1.axis_page_pair_scheduler:64 -sc executor_1.axis_intersect_count_directory_scheduler:scheduler_1.axis_intersect_count_directory_scheduler:64 -sc scheduler_1.axis_read_write_control:executor_1.axis_read_write_control:64 -sc scheduler_1.axis_layer_cache_read_addr:executor_1.axis_layer_cache_read_addr:64 -sc scheduler_1.axis_layer_cache_write_addr:executor_1.axis_layer_cache_write_addr:64 -sc scheduler_1.axis_num_layer_pairs:executor_1.axis_num_layer_pairs:64 -sc scheduler_1.axis_page_ID_pair_read_nodes:executor_1.axis_page_ID_pair_read_nodes:64 -sc scheduler_1.axis_join_PE_ID:executor_1.axis_join_PE_ID:64 -sc scheduler_1.axis_join_finish:executor_1.axis_join_finish:64 -sc executor_1.axis_debug_read_PE_finish:scheduler_1.axis_debug_read_PE_finish:64 -sc executor_1.axis_debug_join_PE_finish:scheduler_1.axis_debug_join_PE_finish:64 -sc executor_1.axis_debug_aggregate_idle_finish:scheduler_1.axis_debug_aggregate_idle_finish:64 -sc executor_1.axis_debug_cache_manager_finish:scheduler_1.axis_debug_cache_manager_finish:64 -sc executor_1.axis_debug_write_PE_finish:scheduler_1.axis_debug_write_PE_finish:64 -slr executor_1:SLR2 -slr scheduler_1:SLR2 -sp executor_1.in_pages_A:DDR[2] -sp executor_1.in_pages_B:DDR[2] -sp executor_1.layer_cache:DDR[2] -sp executor_1.out_intersect:DDR[2] -dmclkid 0 -r /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml
+INFO: [SYSTEM_LINK 82-38] [15:50:23] cfgen started: /tools/Xilinx/Vitis/2022.1/bin/cfgen  -nk executor:1:executor_1 -nk scheduler:1:scheduler_1 -sc executor_1.axis_idle_join_PE_ID:scheduler_1.axis_idle_join_PE_ID:64 -sc executor_1.axis_page_pair_scheduler:scheduler_1.axis_page_pair_scheduler:64 -sc executor_1.axis_intersect_count_directory_scheduler:scheduler_1.axis_intersect_count_directory_scheduler:64 -sc scheduler_1.axis_read_write_control:executor_1.axis_read_write_control:64 -sc scheduler_1.axis_layer_cache_read_addr:executor_1.axis_layer_cache_read_addr:64 -sc scheduler_1.axis_layer_cache_write_addr:executor_1.axis_layer_cache_write_addr:64 -sc scheduler_1.axis_num_layer_pairs:executor_1.axis_num_layer_pairs:64 -sc scheduler_1.axis_page_ID_pair_read_nodes:executor_1.axis_page_ID_pair_read_nodes:64 -sc scheduler_1.axis_join_PE_ID:executor_1.axis_join_PE_ID:64 -sc scheduler_1.axis_join_finish:executor_1.axis_join_finish:64 -sc executor_1.axis_debug_read_PE_finish:scheduler_1.axis_debug_read_PE_finish:64 -sc executor_1.axis_debug_join_PE_finish:scheduler_1.axis_debug_join_PE_finish:64 -sc executor_1.axis_debug_aggregate_idle_finish:scheduler_1.axis_debug_aggregate_idle_finish:64 -sc executor_1.axis_debug_cache_manager_finish:scheduler_1.axis_debug_cache_manager_finish:64 -sc executor_1.axis_debug_write_PE_finish:scheduler_1.axis_debug_write_PE_finish:64 -slr executor_1:SLR2 -slr scheduler_1:SLR2 -sp executor_1.in_pages_A:DDR[2] -sp executor_1.in_pages_B:DDR[2] -sp executor_1.layer_cache:DDR[2] -sp executor_1.out_intersect:DDR[2] -dmclkid 0 -r /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml
 INFO: [CFGEN 83-0] Kernel Specs: 
 INFO: [CFGEN 83-0]   kernel: executor, num: 1  {executor_1}
 INFO: [CFGEN 83-0]   kernel: scheduler, num: 1  {scheduler_1}
@@ -237,29 +237,29 @@ INFO: [CFGEN 83-0]   executor_1.axis_debug_write_PE_finish => scheduler_1.axis_d
 INFO: [CFGEN 83-0] SLR Specs: 
 INFO: [CFGEN 83-0]   instance: executor_1, SLR: SLR2
 INFO: [CFGEN 83-0]   instance: scheduler_1, SLR: SLR2
-INFO: [SYSTEM_LINK 82-37] [13:31:46] cfgen finished successfully
-Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 182171 ; free virtual = 302787
+INFO: [SYSTEM_LINK 82-37] [15:50:30] cfgen finished successfully
+Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 180330 ; free virtual = 303249
 INFO: [SYSTEM_LINK 82-52] Create top-level block diagram
-INFO: [SYSTEM_LINK 82-38] [13:31:46] cf2bd started: /tools/Xilinx/Vitis/2022.1/bin/cf2bd  --linux --trace_buffer 1024 --input_file /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml --ip_db /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml --cf_name dr --working_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.xsd --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int
+INFO: [SYSTEM_LINK 82-38] [15:50:30] cf2bd started: /tools/Xilinx/Vitis/2022.1/bin/cf2bd  --linux --trace_buffer 1024 --input_file /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml --ip_db /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml --cf_name dr --working_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.xsd --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int
 INFO: [CF2BD 82-31] Launching cf2xd: cf2xd -linux -trace-buffer 1024 -i /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/cfgraph/cfgen_cfgraph.xml -r /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.cdb/xd_ip_db.xml -o dr.xml
 INFO: [CF2BD 82-28] cf2xd finished successfully
 INFO: [CF2BD 82-31] Launching cf_xsd: cf_xsd -disable-address-gen -dn dr -dp /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/sys_link/_sysl/.xsd
 INFO: [CF2BD 82-28] cf_xsd finished successfully
-INFO: [SYSTEM_LINK 82-37] [13:32:01] cf2bd finished successfully
-Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 182048 ; free virtual = 302699
-INFO: [v++ 60-1441] [13:32:01] Run run_link: Step system_link: Completed
-Time (s): cpu = 00:00:34 ; elapsed = 00:00:38 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 182102 ; free virtual = 302755
-INFO: [v++ 60-1443] [13:32:01] Run run_link: Step cf2sw: Started
+INFO: [SYSTEM_LINK 82-37] [15:50:45] cf2bd finished successfully
+Time (s): cpu = 00:00:15 ; elapsed = 00:00:15 . Memory (MB): peak = 2269.582 ; gain = 0.000 ; free physical = 180545 ; free virtual = 303470
+INFO: [v++ 60-1441] [15:50:45] Run run_link: Step system_link: Completed
+Time (s): cpu = 00:00:34 ; elapsed = 00:00:38 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 180597 ; free virtual = 303521
+INFO: [v++ 60-1443] [15:50:45] Run run_link: Step cf2sw: Started
 INFO: [v++ 60-1453] Command Line: cf2sw -sdsl /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/sdsl.dat -rtd /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/cf2sw.rtd -nofilter /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/cf2sw_full.rtd -xclbin /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/xclbin_orig.xml -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/xclbin_orig.1.xml
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
-INFO: [v++ 60-1441] [13:32:17] Run run_link: Step cf2sw: Completed
-Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 181395 ; free virtual = 302087
-INFO: [v++ 60-1443] [13:32:17] Run run_link: Step rtd2_system_diagram: Started
+INFO: [v++ 60-1441] [15:51:01] Run run_link: Step cf2sw: Completed
+Time (s): cpu = 00:00:16 ; elapsed = 00:00:16 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 180332 ; free virtual = 303256
+INFO: [v++ 60-1443] [15:51:01] Run run_link: Step rtd2_system_diagram: Started
 INFO: [v++ 60-1453] Command Line: rtd2SystemDiagram
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
-INFO: [v++ 60-1441] [13:32:17] Run run_link: Step rtd2_system_diagram: Completed
-Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.53 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 181498 ; free virtual = 302190
-INFO: [v++ 60-1443] [13:32:17] Run run_link: Step vpl: Started
+INFO: [v++ 60-1441] [15:51:02] Run run_link: Step rtd2_system_diagram: Completed
+Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.51 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 180278 ; free virtual = 303202
+INFO: [v++ 60-1443] [15:51:02] Run run_link: Step vpl: Started
 INFO: [v++ 60-1453] Command Line: vpl -t hw_emu -f xilinx_u250_gen3x16_xdma_4_1_202210_1 -g --kernel_frequency 140 --remote_ip_cache /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/.ipcache -s --output_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int --log_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/logs/link --report_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/link --config /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vplConfig.ini -k /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/kernel_info.dat --webtalk_flag Vitis --temp_dir /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link --emulation_mode debug_waveform --no-info --iprepo /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/xo/ip_repo/xilinx_com_hls_executor_1_0 --iprepo /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/xo/ip_repo/xilinx_com_hls_scheduler_1_0 --messageDb /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link/vpl.pb /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/dr.bd.tcl
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
 
@@ -271,36 +271,36 @@ INFO: [VPL 60-839] Read in kernel information from file '/pub/scratch/wenqi/spat
 INFO: [VPL 74-78] Compiler Version string: 2022.1
 INFO: [VPL 60-423]   Target device: xilinx_u250_gen3x16_xdma_4_1_202210_1
 INFO: [VPL 60-1032] Extracting hardware platform to /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/vivado/vpl/.local/hw_platform
-[13:33:01] Run vpl: Step create_project: Started
+[15:51:47] Run vpl: Step create_project: Started
 Creating Vivado project.
-[13:34:18] Run vpl: Step create_project: RUNNING...
-[13:34:22] Run vpl: Step create_project: Completed
-[13:34:22] Run vpl: Step create_bd: Started
-[13:34:44] Run vpl: Step create_bd: Completed
-[13:34:44] Run vpl: Step update_bd: Started
+[15:53:04] Run vpl: Step create_project: RUNNING...
+[15:53:11] Run vpl: Step create_project: Completed
+[15:53:11] Run vpl: Step create_bd: Started
+[15:53:34] Run vpl: Step create_bd: Completed
+[15:53:34] Run vpl: Step update_bd: Started
 CRITICAL WARNING: [VPL-1] Unable to support 36 monitors. Limiting to 32.
-[13:36:08] Run vpl: Step update_bd: RUNNING...
-[13:37:31] Run vpl: Step update_bd: RUNNING...
-[13:37:44] Run vpl: Step update_bd: Completed
-[13:37:44] Run vpl: Step generate_target: Started
-[13:39:06] Run vpl: Step generate_target: RUNNING...
-[13:40:31] Run vpl: Step generate_target: RUNNING...
-[13:41:45] Run vpl: Step generate_target: Completed
-[13:41:45] Run vpl: Step config_hw_emu.gen_scripts: Started
-[13:42:19] Run vpl: Step config_hw_emu.gen_scripts: Completed
-[13:42:19] Run vpl: Step config_hw_emu.compile: Started
-[13:44:02] Run vpl: Step config_hw_emu.compile: RUNNING...
-[13:45:45] Run vpl: Step config_hw_emu.compile: RUNNING...
-[13:47:19] Run vpl: Step config_hw_emu.compile: RUNNING...
-[13:49:02] Run vpl: Step config_hw_emu.compile: RUNNING...
-[13:50:34] Run vpl: Step config_hw_emu.compile: RUNNING...
-[13:51:38] Run vpl: Step config_hw_emu.compile: Completed
-[13:51:38] Run vpl: Step config_hw_emu.elaborate: Started
-[13:52:59] Run vpl: Step config_hw_emu.elaborate: Completed
-[13:53:02] Run vpl: FINISHED. Run Status: config_hw_emu.elaborate Complete!
-INFO: [v++ 60-1441] [13:53:07] Run run_link: Step vpl: Completed
-Time (s): cpu = 00:00:21 ; elapsed = 00:20:50 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 163550 ; free virtual = 286887
-INFO: [v++ 60-1443] [13:53:07] Run run_link: Step rtdgen: Started
+[15:54:58] Run vpl: Step update_bd: RUNNING...
+[15:56:21] Run vpl: Step update_bd: RUNNING...
+[15:56:34] Run vpl: Step update_bd: Completed
+[15:56:34] Run vpl: Step generate_target: Started
+[15:57:57] Run vpl: Step generate_target: RUNNING...
+[15:59:21] Run vpl: Step generate_target: RUNNING...
+[16:00:26] Run vpl: Step generate_target: Completed
+[16:00:26] Run vpl: Step config_hw_emu.gen_scripts: Started
+[16:00:57] Run vpl: Step config_hw_emu.gen_scripts: Completed
+[16:00:57] Run vpl: Step config_hw_emu.compile: Started
+[16:02:37] Run vpl: Step config_hw_emu.compile: RUNNING...
+[16:04:20] Run vpl: Step config_hw_emu.compile: RUNNING...
+[16:05:55] Run vpl: Step config_hw_emu.compile: RUNNING...
+[16:07:39] Run vpl: Step config_hw_emu.compile: RUNNING...
+[16:09:10] Run vpl: Step config_hw_emu.compile: RUNNING...
+[16:09:49] Run vpl: Step config_hw_emu.compile: Completed
+[16:09:49] Run vpl: Step config_hw_emu.elaborate: Started
+[16:11:04] Run vpl: Step config_hw_emu.elaborate: Completed
+[16:11:08] Run vpl: FINISHED. Run Status: config_hw_emu.elaborate Complete!
+INFO: [v++ 60-1441] [16:11:13] Run run_link: Step vpl: Completed
+Time (s): cpu = 00:00:20 ; elapsed = 00:20:11 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 153588 ; free virtual = 277504
+INFO: [v++ 60-1443] [16:11:13] Run run_link: Step rtdgen: Started
 INFO: [v++ 60-1453] Command Line: rtdgen
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
 INFO: [v++ 60-991] clock name 'kernel_clk/clk' (clock ID '0') is being mapped to clock name 'DATA_CLK' in the xclbin
@@ -308,9 +308,9 @@ INFO: [v++ 60-1230] The compiler selected the following frequencies for the runt
 INFO: [v++ 60-1453] Command Line: cf2sw -a /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/address_map.xml -sdsl /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/sdsl.dat -xclbin /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/xclbin_orig.xml -rtd /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu.rtd -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu.xml
 INFO: [v++ 60-1652] Cf2sw returned exit code: 0
 WARNING: [v++ 60-1455] Debuggable symbols are not generated successfully, clean up /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/consolidated.cf
-INFO: [v++ 60-1441] [13:53:33] Run run_link: Step rtdgen: Completed
-Time (s): cpu = 00:00:24 ; elapsed = 00:00:26 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 165537 ; free virtual = 288967
-INFO: [v++ 60-1443] [13:53:33] Run run_link: Step xclbinutil: Started
+INFO: [v++ 60-1441] [16:11:38] Run run_link: Step rtdgen: Completed
+Time (s): cpu = 00:00:23 ; elapsed = 00:00:25 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 151549 ; free virtual = 275826
+INFO: [v++ 60-1443] [16:11:38] Run run_link: Step xclbinutil: Started
 INFO: [v++ 60-1453] Command Line: xclbinutil --add-section DEBUG_IP_LAYOUT:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/debug_ip_layout.rtd --add-section BITSTREAM:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/behav.xse --force --target hw_emu --key-value SYS:dfx_enable:false --add-section :JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu.rtd --add-section CLOCK_FREQ_TOPOLOGY:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu_xml.rtd --add-section BUILD_METADATA:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu_build.rtd --add-section EMBEDDED_METADATA:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/vadd.hw_emu.xml --add-section SYSTEM_METADATA:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/systemDiagramModelSlrBaseAddress.json --key-value SYS:PlatformVBNV:xilinx_u250_gen3x16_xdma_4_1_202210_1 --output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
 XRT Build Version: 2.13.466 (2022.1)
@@ -324,7 +324,7 @@ Format : JSON
 File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/debug_ip_layout.rtd'
 
 Section: 'BITSTREAM'(0) was successfully added.
-Size   : 87143350 bytes
+Size   : 87152616 bytes
 Format : RAW
 File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/behav.xse'
 
@@ -359,20 +359,20 @@ Section: 'SYSTEM_METADATA'(22) was successfully added.
 Size   : 78252 bytes
 Format : RAW
 File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/int/systemDiagramModelSlrBaseAddress.json'
-Successfully wrote (87409109 bytes) to the output file: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin
+Successfully wrote (87418373 bytes) to the output file: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin
 Leaving xclbinutil.
-INFO: [v++ 60-1441] [13:53:33] Run run_link: Step xclbinutil: Completed
-Time (s): cpu = 00:00:00.16 ; elapsed = 00:00:00.49 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 165029 ; free virtual = 288544
-INFO: [v++ 60-1443] [13:53:33] Run run_link: Step xclbinutilinfo: Started
+INFO: [v++ 60-1441] [16:11:38] Run run_link: Step xclbinutil: Completed
+Time (s): cpu = 00:00:00.14 ; elapsed = 00:00:00.59 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 151586 ; free virtual = 275952
+INFO: [v++ 60-1443] [16:11:38] Run run_link: Step xclbinutilinfo: Started
 INFO: [v++ 60-1453] Command Line: xclbinutil --quiet --force --info /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin.info --input /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
-INFO: [v++ 60-1441] [13:53:34] Run run_link: Step xclbinutilinfo: Completed
-Time (s): cpu = 00:00:00.87 ; elapsed = 00:00:01 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 164193 ; free virtual = 287708
-INFO: [v++ 60-1443] [13:53:34] Run run_link: Step generate_sc_driver: Started
+INFO: [v++ 60-1441] [16:11:39] Run run_link: Step xclbinutilinfo: Completed
+Time (s): cpu = 00:00:00.81 ; elapsed = 00:00:01 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 151562 ; free virtual = 275941
+INFO: [v++ 60-1443] [16:11:39] Run run_link: Step generate_sc_driver: Started
 INFO: [v++ 60-1453] Command Line: 
 INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/link/run_link
-INFO: [v++ 60-1441] [13:53:34] Run run_link: Step generate_sc_driver: Completed
-Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 164165 ; free virtual = 287680
+INFO: [v++ 60-1441] [16:11:39] Run run_link: Step generate_sc_driver: Completed
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.02 . Memory (MB): peak = 2209.727 ; gain = 0.000 ; free physical = 151560 ; free virtual = 275939
 INFO: [v++ 60-244] Generating system estimate report...
 INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/_x.hw_emu/reports/link/system_estimate_vadd.hw_emu.xtxt
 INFO: [v++ 60-586] Created xclbin/vadd.hw_emu.xclbin
@@ -382,7 +382,7 @@ INFO: [v++ 60-1307] Run completed. Additional information can be found in:
 
 INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
     vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1_8_PE_hw_emu/xclbin/vadd.hw_emu.xclbin.link_summary 
-INFO: [v++ 60-791] Total elapsed time: 0h 22m 34s
+INFO: [v++ 60-791] Total elapsed time: 0h 21m 54s
 INFO: [v++ 60-1653] Closing dispatch client.
 /tools/Xilinx//Vitis/2022.1/bin/emconfigutil --nd 1 --od . --platform xilinx_u250_gen3x16_xdma_4_1_202210_1
 

@@ -308,7 +308,10 @@ void write_results(
             for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
                 if (!s_result_pair_leaf[PE_id].empty()) {
                     has_content_recheck = true; 
-                    break;
+                    // Wenqi: no break here, all the empty signals will be and in a single cycle,
+                    //   and the break will break the outer while loop instead of this for loop 
+                    //   (HLS behavior problem)
+                    ////// break;
                 }
             }
             if (!has_content_recheck) {

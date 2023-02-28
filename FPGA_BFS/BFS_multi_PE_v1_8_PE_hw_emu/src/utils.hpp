@@ -78,9 +78,10 @@ void aggregate_finish_signals(
     //  then write a signal indicate all of them are finished
     int finish = 0;
     for (int i = 0; i < n_in; i++) {
-        finish = s_join_finish_in[i].read();
+        finish += s_join_finish_in[i].read();
     }
 
+    finish /= n_in;
     s_join_finish_out.write(finish);
     axis_debug_join_PE_finish.write(1);
 }
