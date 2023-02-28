@@ -24,7 +24,7 @@ Measure executor time.
 
 ## Multi PE
 
-### V1 
+### V1.0 
 
 The vanilla version of multiple PE, but already has all functionality. 
 
@@ -49,3 +49,16 @@ Measure executor time.
 * sample_tree_level_4_self_join_235112.bin : 30.8454 ms @ 140 MHZ
 
 **Conclusion: has some overhead compared to single PE version implementation. When there are many pages, the performance can only achieve ~70% of the single PE version.**
+
+8 PE:
+* sample_tree_level_1_self_join_156 : 0.0157857 ms @ 140 MHZ
+* sample_tree_level_2_self_join_2090.bin : 0.194357 ms @ 140 MHZ
+* sample_tree_level_3_self_join_19246.bin : 1.85011 ms @ 140 MHZ
+* sample_tree_level_4_self_join_235112.bin : 20.6116 ms @ 140 MHZ
+
+**Conclusion: has some speedup compare to 1 PE, but not a lot probably due to (a) the inefficient result gather functionality (b) the selectivity is too low, such that most of the pairs are written to memory which caps the performance.**
+
+
+### V1.1
+
+Compare to 1.0, optimizing the round-robin read from join PEs. Basically, use a while to read from a PE, so if one PE has much more output than others, the writer / cache manager can keep reading from it. 
