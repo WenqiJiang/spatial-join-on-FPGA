@@ -94,3 +94,16 @@ For 100 million writes:
 For 100 million writes: 
 
 742.19 ms @140 MHz -> 742.19 / 1000 / 1e8 / (1/140/1e6) = 1.04 cycles per write. 
+
+### optimized_write_results (default burst length)
+
+1017.64 ms @ 140 MHz -> 1017.64 / 1000 / 1e8 / (1/140/1e6) = 1.42 cycles per write.
+
+Conclusion: performance close to default for loop write (1.31 cycle / write). Thus the manual burst makes sense. 
+
+### optimized_write_results_max_burst_length_128
+
+964.085 ms @ 140 MHz -> 964.085 / 1000 / 1e8 / (1/140/1e6) = 1.35 cycles per write.
+
+Conclusion: increase AXI burst length doesn't seem to help with the performance that much for the manual buffering case. 
+

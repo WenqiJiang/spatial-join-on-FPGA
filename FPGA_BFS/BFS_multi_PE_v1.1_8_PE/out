@@ -426,3 +426,118 @@ WARNING: [VPL-1] The use of profile options turned on trace, which uses a memory
 [16:37:18] Phase 7.1.1 Update Timing
 [16:38:31] Phase 8 Route finalize
 [16:39:07] Phase 9 Verifying routed nets
+[16:52:24] Phase 10 Depositing Routes
+[17:14:10] Creating bitmap...
+[17:19:36] Writing bitstream ./level0_i_level1_level1_i_ulp_my_rm_partial.bit...
+[17:19:36] Finished 6th of 6 tasks (FPGA bitstream generation). Elapsed time: 01h 05m 50s 
+[17:22:44] Run vpl: Step impl: Completed
+[17:22:47] Run vpl: FINISHED. Run Status: impl Complete!
+INFO: [v++ 60-1441] [17:22:54] Run run_link: Step vpl: Completed
+Time (s): cpu = 00:05:42 ; elapsed = 03:31:18 . Memory (MB): peak = 2190.145 ; gain = 0.000 ; free physical = 56601 ; free virtual = 319101
+INFO: [v++ 60-1443] [17:22:54] Run run_link: Step rtdgen: Started
+INFO: [v++ 60-1453] Command Line: rtdgen
+INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/run_link
+INFO: [v++ 60-991] clock name 'ss_ucs/aclk_kernel_00' (clock ID '0') is being mapped to clock name 'DATA_CLK' in the xclbin
+INFO: [v++ 60-991] clock name 'ss_ucs/aclk_kernel_01' (clock ID '1') is being mapped to clock name 'KERNEL_CLK' in the xclbin
+INFO: [v++ 60-1230] The compiler selected the following frequencies for the runtime controllable kernel clock(s) and scalable system clock(s): Kernel (DATA) clock: ss_ucs/aclk_kernel_00 = 140, Kernel (KERNEL) clock: ss_ucs/aclk_kernel_01 = 500
+INFO: [v++ 60-1453] Command Line: cf2sw -force-enable-memory DDR[0] -a /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/address_map.xml -sdsl /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/sdsl.dat -xclbin /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/xclbin_orig.xml -rtd /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw.rtd -o /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw.xml
+INFO: [v++ 60-1652] Cf2sw returned exit code: 0
+INFO: [v++ 60-1441] [17:23:05] Run run_link: Step rtdgen: Completed
+Time (s): cpu = 00:00:10 ; elapsed = 00:00:10 . Memory (MB): peak = 2190.145 ; gain = 0.000 ; free physical = 60368 ; free virtual = 322869
+INFO: [v++ 60-1443] [17:23:05] Run run_link: Step xclbinutil: Started
+INFO: [v++ 60-1453] Command Line: xclbinutil --add-section DEBUG_IP_LAYOUT:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/debug_ip_layout.rtd --add-section BITSTREAM:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/partial.bit --force --target hw --key-value SYS:dfx_enable:true --add-section :JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw.rtd --append-section :JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/appendSection.rtd --add-section CLOCK_FREQ_TOPOLOGY:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw_xml.rtd --add-section BUILD_METADATA:JSON:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw_build.rtd --add-section EMBEDDED_METADATA:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw.xml --add-section SYSTEM_METADATA:RAW:/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/systemDiagramModelSlrBaseAddress.json --key-value SYS:PlatformVBNV:xilinx_u250_gen3x16_xdma_4_1_202210_1 --output /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.xclbin
+INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/run_link
+XRT Build Version: 2.13.466 (2022.1)
+       Build Date: 2022-04-14 17:43:11
+          Hash ID: f5505e402c2ca1ffe45eb6d3a9399b23a0dc8776
+Creating a default 'in-memory' xclbin image.
+
+Section: 'DEBUG_IP_LAYOUT'(9) was successfully added.
+Size   : 4184 bytes
+Format : JSON
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/debug_ip_layout.rtd'
+
+Section: 'BITSTREAM'(0) was successfully added.
+Size   : 55876754 bytes
+Format : RAW
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/partial.bit'
+
+Section: 'MEM_TOPOLOGY'(6) was successfully added.
+Format : JSON
+File   : 'mem_topology'
+
+Section: 'IP_LAYOUT'(8) was successfully added.
+Format : JSON
+File   : 'ip_layout'
+
+Section: 'CONNECTIVITY'(7) was successfully added.
+Format : JSON
+File   : 'connectivity'
+
+Section: 'CLOCK_FREQ_TOPOLOGY'(11) was successfully added.
+Size   : 274 bytes
+Format : JSON
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw_xml.rtd'
+
+Section: 'BUILD_METADATA'(14) was successfully added.
+Size   : 11549 bytes
+Format : JSON
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw_build.rtd'
+
+Section: 'EMBEDDED_METADATA'(2) was successfully added.
+Size   : 123127 bytes
+Format : RAW
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/vadd.hw.xml'
+
+Section: 'SYSTEM_METADATA'(22) was successfully added.
+Size   : 66049 bytes
+Format : RAW
+File   : '/pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/int/systemDiagramModelSlrBaseAddress.json'
+
+Section: 'PARTITION_METADATA'(20) was successfully appended to.
+Format : JSON
+File   : 'partition_metadata'
+
+Section: 'IP_LAYOUT'(8) was successfully appended to.
+Format : JSON
+File   : 'ip_layout'
+Successfully wrote (56118027 bytes) to the output file: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.xclbin
+Leaving xclbinutil.
+INFO: [v++ 60-1441] [17:23:05] Run run_link: Step xclbinutil: Completed
+Time (s): cpu = 00:00:00.13 ; elapsed = 00:00:00.67 . Memory (MB): peak = 2190.145 ; gain = 0.000 ; free physical = 60314 ; free virtual = 322867
+INFO: [v++ 60-1443] [17:23:05] Run run_link: Step xclbinutilinfo: Started
+INFO: [v++ 60-1453] Command Line: xclbinutil --quiet --force --info /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.xclbin.info --input /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.xclbin
+INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/run_link
+INFO: [v++ 60-1441] [17:23:06] Run run_link: Step xclbinutilinfo: Completed
+Time (s): cpu = 00:00:00.54 ; elapsed = 00:00:00.68 . Memory (MB): peak = 2190.145 ; gain = 0.000 ; free physical = 60314 ; free virtual = 322867
+INFO: [v++ 60-1443] [17:23:06] Run run_link: Step generate_sc_driver: Started
+INFO: [v++ 60-1453] Command Line: 
+INFO: [v++ 60-1454] Run Directory: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/link/run_link
+INFO: [v++ 60-1441] [17:23:06] Run run_link: Step generate_sc_driver: Completed
+Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2190.145 ; gain = 0.000 ; free physical = 60316 ; free virtual = 322870
+INFO: [v++ 60-2331] SLR2 was specfied for compute unit executor_1, and verified as such in implementation.
+INFO: [v++ 60-2331] SLR2 was specfied for compute unit scheduler_1, and verified as such in implementation.
+INFO: [v++ 60-244] Generating system estimate report...
+INFO: [v++ 60-1092] Generated system estimate report: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/reports/link/system_estimate_vadd.hw.xtxt
+INFO: [v++ 60-586] Created /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.ltx
+INFO: [v++ 60-586] Created xclbin/vadd.hw.xclbin
+INFO: [v++ 60-1307] Run completed. Additional information can be found in:
+	Guidance: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/reports/link/v++_link_vadd.hw_guidance.html
+	Timing Report: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/reports/link/imp/impl_1_hw_bb_locked_timing_summary_routed.rpt
+	Vivado Log: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/logs/link/vivado.log
+	Steps Log File: /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/_x.hw/logs/link/link.steps.log
+
+INFO: [v++ 60-2343] Use the vitis_analyzer tool to visualize and navigate the relevant reports. Run the following command. 
+    vitis_analyzer /pub/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v1.1_8_PE/xclbin/vadd.hw.xclbin.link_summary 
+INFO: [v++ 60-791] Total elapsed time: 3h 32m 33s
+INFO: [v++ 60-1653] Closing dispatch client.
+/tools/Xilinx//Vitis/2022.1/bin/emconfigutil --nd 1 --od . --platform xilinx_u250_gen3x16_xdma_4_1_202210_1
+
+****** configutil v2022.1 (64-bit)
+  **** SW Build 3524075 on 2022-04-13-17:42:45
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+INFO: [ConfigUtil 60-895]   Target platform: /opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/xilinx_u250_gen3x16_xdma_4_1_202210_1.xpfm
+INFO: [ConfigUtil 60-1578]   This platform contains Xilinx Shell Archive '/opt/xilinx/platforms/xilinx_u250_gen3x16_xdma_4_1_202210_1/hw/hw.xsa'
+INFO: [ConfigUtil 60-1032] Extracting hardware platform to .
+emulation configuration file `emconfig.json` is created in . directory 
