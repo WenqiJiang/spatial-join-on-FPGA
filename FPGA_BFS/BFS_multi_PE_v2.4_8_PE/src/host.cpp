@@ -160,10 +160,10 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_executor.setArg(2, int(root_id_A)));
     OCL_CHECK(err, err = krnl_executor.setArg(3, int(root_id_B)));
     OCL_CHECK(err, err = krnl_executor.setArg(4, int(page_bytes)));
-    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_executor.setArg(14, buffer_in_pages_B));
-    OCL_CHECK(err, err = krnl_executor.setArg(18, buffer_layer_cache));
-    OCL_CHECK(err, err = krnl_executor.setArg(19, buffer_out));
+    OCL_CHECK(err, err = krnl_executor.setArg(12, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_in_pages_B));
+    OCL_CHECK(err, err = krnl_executor.setArg(17, buffer_layer_cache));
+    OCL_CHECK(err, err = krnl_executor.setArg(18, buffer_out));
 
 
     // Copy input data to device global memory

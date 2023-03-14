@@ -14,8 +14,7 @@ void executor(
     int page_bytes,
     // input streams
     //   to layer cache controller
-    hls::stream<int>& axis_read_write_control, // 0 -> read from memory; 1 -> write to memory 
-    hls::stream<int>& axis_layer_cache_read_addr, 
+    hls::stream<mem_burst_t>& axis_layer_cache_read_info, 
     hls::stream<int>& axis_layer_cache_write_addr, 
     hls::stream<int>& axis_num_layer_pairs, // number of pairs to join in this layer
     //   to node reading PE
@@ -47,8 +46,7 @@ void executor(
 //    https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Controlling-AXI4-Burst-Behavior
 
 // input streams
-#pragma HLS INTERFACE axis port=axis_read_write_control
-#pragma HLS INTERFACE axis port=axis_layer_cache_read_addr
+#pragma HLS INTERFACE axis port=axis_layer_cache_read_info
 #pragma HLS INTERFACE axis port=axis_layer_cache_write_addr
 #pragma HLS INTERFACE axis port=axis_num_layer_pairs
 #pragma HLS INTERFACE axis port=axis_page_ID_pair_read_nodes
@@ -240,8 +238,7 @@ void executor(
         s_result_pair_directory_burst_length, 
         s_result_pair_directory_burst, 
         //   from scheduler
-        axis_read_write_control, // 0 -> read from memory; 1 -> write to memory 
-        axis_layer_cache_read_addr, 
+        axis_layer_cache_read_info, 
         axis_layer_cache_write_addr, 
         axis_num_layer_pairs,
         s_finish_aggregate_join_idle_out,

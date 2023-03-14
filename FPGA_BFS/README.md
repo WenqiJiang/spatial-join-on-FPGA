@@ -180,20 +180,32 @@ Writing 5182308 results, if we can achieve 1 write per cycle, consume 5182308 / 
 
 Further improve write burst: using a long burst packet size of 1024 and a shorter AXI burst length of 64 to allow multiple write operations on the fly. 
 
-1 PE:
+8 PE:
 
-* sample_tree_level_3_self_join_19246.bin : 1.46256 ms @ 140 MHZ
-* sample_tree_level_4_self_join_235112.bin : 20.2534 ms @ 140 MHZ
-* sample_tree_level_5_self_join_5182308.bin: 313.537 ms @ 140 MHZ
+* sample_tree_level_3_self_join_19246.bin : 0.649321 ms @ 140 MHZ
+* sample_tree_level_4_self_join_235112.bin : 8.88628 ms @ 140 MHZ
+* sample_tree_level_5_self_join_5182308.bin: 137.24 ms @ 140 MHZ
+
+**Conclusion: no improvement after optimizing write. The problem could very well be the read: the read unit has to handle too many pages, because each only contains too little content (16 MBRs per page in the current workload). Plus, the layer cache has to fetch data pretty frequently from memory.**
+
+
+### V2.4
+
+Optimize the layer cache, add a BRAM-based cache in the scheduler. 
+
+Original need:
+* optimizize scheduler protocol: it should cache a number of page pairs to assign next, rather than issuing a lot of read request to the cache manager.
 
 8 PE:
 
-* sample_tree_level_3_self_join_19246.bin : 0.682864 ms @ 140 MHZ
-* sample_tree_level_4_self_join_235112.bin : 8.89053 ms @ 140 MHZ
-* sample_tree_level_5_self_join_5182308.bin: 137.229 ms @ 140 MHZ
+* sample_tree_level_3_self_join_19246.bin : 0.649207 ms @ 140 MHZ
+* sample_tree_level_4_self_join_235112.bin : 8.89006 ms @ 140 MHZ
+* sample_tree_level_5_self_join_5182308.bin: 137.142 ms @ 140 MHZ
 
-**Conclusion: no improvement after optimizing write. The problem could very well be the read: the read unit has to handle too many pages, because each only contains too little content (16 MBRs per page in the current workload). Plus, the layer cache has to fetch data pretty frequently from memory.**
 #### Potential further optimization
 
-* optimizize scheduler protocol: it should cache a number of page pairs to assign next, rather than issuing a lot of read request to the cache manager.
 * change the workload -> it should join pages of at least hundreds of entries, not using the current workload with just 16 MBRs. 
+* using PCIe streaming interface (not supported anymore in Vitis) or network to send out the results. Some relevant material that may help improving memory copy:
+  * https://support.xilinx.com/s/question/0D52E00006vy1fHSAQ/how-to-stream-data-between-host-and-kernel?language=en_US
+  * https://github.com/Xilinx/Vitis_Accel_Examples/blob/master/host/host_memory_simple/src/host.cpp
+  * Not sure those memory mapped region on host will be automatically updated once the FPGA writes something

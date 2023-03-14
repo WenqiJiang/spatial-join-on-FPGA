@@ -41,10 +41,10 @@ int main(int argc, char** argv)
 
     string tree_parent_dir = "/mnt/scratch/wenqi/spatial-join-on-FPGA/tree_bin";
     // string tree_fname = "sample_tree_level_1_self_join_156.bin";
-    string tree_fname = "sample_tree_level_2_self_join_2090.bin";
+    //  string tree_fname = "sample_tree_level_2_self_join_2090.bin";
     // string tree_fname = "sample_tree_level_3_self_join_19246.bin";
     // string tree_fname = "sample_tree_level_4_self_join_235112.bin";
-    // string tree_fname = "sample_tree_level_5_self_join_5182308.bin";
+    string tree_fname = "sample_tree_level_5_self_join_5182308.bin";
     string tree_bin_dir = dir_concat(tree_parent_dir, tree_fname);
 
     // regex in c++: https://www.softwaretestinghelp.com/regex-in-cpp/

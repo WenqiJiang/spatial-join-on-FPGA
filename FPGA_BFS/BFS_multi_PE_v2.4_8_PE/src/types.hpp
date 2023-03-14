@@ -61,3 +61,9 @@ typedef struct {
     pair_t pair;
     bool last;    // whether this is the last iteration of result sending
 } result_t;
+
+typedef struct {
+    // starting from the given address, read/write num times
+    ap_uint<64> addr; 
+    int num;
+} mem_burst_t; 

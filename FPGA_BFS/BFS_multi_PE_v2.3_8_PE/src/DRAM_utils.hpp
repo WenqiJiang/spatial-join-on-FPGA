@@ -156,7 +156,7 @@ void burst_buffer(
 ) {
 
     // max_burst_length must <= the output FIFO length & AXI burst length
-    const int max_burst_length = 1024 - 1;
+    const int max_burst_length = 512;
 
     while (true) {
 
@@ -182,7 +182,7 @@ void burst_buffer(
             // send data length, length is always > 0 because we did data empty check
             s_result_pair_burst_length.write(burst_length);
         }
-        if (!s_join_finish_in.empty()) {
+        else if (!s_join_finish_in.empty()) {
             int break_signal = s_join_finish_in.read(); // must read to make dataflow work
             s_join_finish_out.write(break_signal);
             break;

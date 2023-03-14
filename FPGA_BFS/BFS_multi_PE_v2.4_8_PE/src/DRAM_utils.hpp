@@ -156,7 +156,7 @@ void burst_buffer(
 ) {
 
     // max_burst_length must <= the output FIFO length & AXI burst length
-    const int max_burst_length = 1024 - 1;
+    const int max_burst_length = 512;
 
     while (true) {
 
@@ -182,7 +182,7 @@ void burst_buffer(
             // send data length, length is always > 0 because we did data empty check
             s_result_pair_burst_length.write(burst_length);
         }
-        if (!s_join_finish_in.empty()) {
+        else if (!s_join_finish_in.empty()) {
             int break_signal = s_join_finish_in.read(); // must read to make dataflow work
             s_join_finish_out.write(break_signal);
             break;
@@ -204,8 +204,7 @@ void layer_cache_memory_controller(
     hls::stream<int> (&s_result_pair_directory_burst_length)[N_JOIN_PE],
     hls::stream<result_t> (&s_result_pair_directory_burst)[N_JOIN_PE],
     //   from scheduler
-    hls::stream<int>& axis_read_write_control, // 0 -> read from memory; 1 -> write to memory 
-    hls::stream<int>& axis_layer_cache_read_addr, 
+    hls::stream<mem_burst_t>& axis_layer_cache_read_info, 
     hls::stream<int>& axis_layer_cache_write_addr, 
     hls::stream<int>& axis_num_layer_pairs, // number of pairs to join in this layer
     hls::stream<int>& s_join_finish_in,
@@ -239,7 +238,6 @@ void layer_cache_memory_controller(
         int num_layer_pairs = block_read<int>(axis_num_layer_pairs);
 
         // write signal and address
-        int write_signal = block_read<int>(axis_read_write_control); // should be 1 -> write
         int write_start_addr = block_read<int>(axis_layer_cache_write_addr);
         int write_count = 0;
         int last_count = 0; // number of page joins finished
@@ -252,11 +250,13 @@ void layer_cache_memory_controller(
             }
 
             // read signal arrives
-            else if (!axis_read_write_control.empty()) { 
-                int read_signal = block_read<int>(axis_read_write_control); // should be 0 -> read
-                int addr = block_read<int>(axis_layer_cache_read_addr);
-                pair_t next_page_pair = unpack_pair(layer_cache[addr]);
-                axis_page_pair_scheduler.write(next_page_pair);
+            else if (!axis_layer_cache_read_info.empty()) { 
+                mem_burst_t read_info = block_read<mem_burst_t>(axis_layer_cache_read_info);
+                for (int i = 0; i < read_info.num; i++) {
+#pragma HLS pipeline II=1
+                    pair_t next_page_pair = unpack_pair(layer_cache[read_info.addr + i]);
+                    axis_page_pair_scheduler.write(next_page_pair);
+                }
             } 
 
             // write to memory by loading content from join PEs

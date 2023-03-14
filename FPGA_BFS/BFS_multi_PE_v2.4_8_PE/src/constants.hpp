@@ -19,4 +19,4 @@
 #define MAX_PAGE_ENTRY_NUM 4096 
 
 // join PE number
-#define N_JOIN_PE 1
+#define N_JOIN_PE 8
