@@ -302,9 +302,28 @@ def load_serialized_index(in_dir, node_bytes=4096):
 
     return root
 
+def tree_max_depth(root):    
+    """
+    Use DFS to get the maximum depth of a tree
+    """
+
+    def get_node_depth(node):
+        if node.is_leaf:
+            return 1
+        else:
+            max_depth = 0
+            for child in node.child_ptrs:
+                depth = get_node_depth(child) + 1
+                if depth > max_depth:
+                    max_depth = depth
+            return max_depth
+
+    depth = get_node_depth(root)
+
+    return depth 
 
 if __name__ == "__main__":
-	
+    
     max_level = 4
     directory_node_fanout=2
     data_node_fanout=100

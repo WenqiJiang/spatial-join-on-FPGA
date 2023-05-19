@@ -202,6 +202,23 @@ Original need:
 * sample_tree_level_4_self_join_235112.bin : 8.89006 ms @ 140 MHZ
 * sample_tree_level_5_self_join_5182308.bin: 137.142 ms @ 140 MHZ
 
+Placement & Routing
+
+16 PE, both in SLR2, all connected to DRAM channel 2 -> fail
+
+16 PE, using two channels (2 and 3, read A 2 read B 2 write intermediate 2 write final 3) -> suceed
+
+### V2.5
+
+1. Shrink the MAX_PAGE_ENTRY_NUM (max page size in join PE) from 4096 to 512, reducing URAM usage (previous 14 URAM per PE). 
+2. Optimize read. Previous: read the node meta first, then read content and parse (3 cycles per 64-byte). For small pages, this two random access with dependency can ruin performance. Current solution: set a software max entry number, the reader reads the entire node, sends the entire raw pages to the join PE, which is responsible for further parsing.
+
+### V2.6
+
+V2.5 merges the join PE with parsing the raw 512-byte page inputs. However, this lead to significant slow down in performance. This also lead to frequency drop at 200 MHz (achieved 169), which does not appear in V2.4 (either due to the more complex join PE, or because the reduced usage of URAM and increasing usage in BRAM due to the reduced hardware page size limit).
+
+In V2.6, I add a parser before each join PE, such that the PE can still focus on the join by consuming already parsed data.
+
 #### Potential further optimization
 
 * change the workload -> it should join pages of at least hundreds of entries, not using the current workload with just 16 MBRs. 

@@ -1,3 +1,14 @@
+/*
+Example Usage: 
+./host xclbin/vadd.hw.xclbin /mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_A.bin /mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_B.bin 3 3 128 40428
+
+std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
+	"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
+
+
+*/
+
+
 #include <stdint.h>
 #include <chrono>
 #include <regex> 
@@ -25,88 +36,78 @@ void wait_for_enter(const std::string &msg) {
 
 int main(int argc, char** argv)
 {
-    cl_int err;
-    // Allocate Memory in Host Memory
-    // When creating a buffer with user pointer (CL_MEM_USE_HOST_PTR), under the hood user ptr 
-    // is used if it is properly aligned. when not aligned, runtime had no choice but to create
-    // its own host side buffer. So it is recommended to use this allocator if user wish to
-    // create buffer using CL_MEM_USE_HOST_PTR to align user buffer to page boundary. It will 
-    // ensure that user buffer is used when user create Buffer/Mem object with CL_MEM_USE_HOST_PTR 
 
-    int max_level_A;
-    int max_level_B;
+	if (argc != 8) {
+        // Rx bytes = Tx byte (forwarding the data)
+        std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
+			"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
+		std::cout << "Example Usage: ./host xclbin/vadd.hw.xclbin /mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_A.bin "
+			"/mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_B.bin 3 3 128 39600";
+        exit(1);
+    }
+
     int root_id_A = 0;
     int root_id_B = 0;
-    int page_bytes = 4096;
+    int max_level_A = stoi(argv[4]);
+    int max_level_B = stoi(argv[5]);
+    int page_bytes = 4096; // page size -> used in the index bin
+	int max_entry_num = stoi(argv[6]);   // max number of entries per page (set by CPU)
+	int sw_num_results = stoi(argv[7]);
+	int entry_axi = max_entry_num % 3 == 0? max_entry_num / 3 : max_entry_num / 3 + 1;
+	int axi_per_page = 1 + entry_axi;   // number of 64-byte read per node, <= page_bytes, decided by entry_num
+	if (axi_per_page * 64 > page_bytes) {
+		std::cout << "axi_per_page * 64 > page_bytes";
+		exit(1);
+	}
 
-    string tree_parent_dir = "/mnt/scratch/wenqi/spatial-join-on-FPGA/tree_bin";
-    // string tree_fname = "sample_tree_level_1_self_join_156.bin";
-    // string tree_fname = "sample_tree_level_2_self_join_2090.bin";
-    // string tree_fname = "sample_tree_level_3_self_join_19246.bin";
-    string tree_fname = "sample_tree_level_2_self_join_10004.bin";
-    // string tree_fname = "sample_tree_level_3_self_join_100432.bin";
-    // string tree_fname = "sample_tree_level_4_self_join_235112.bin";
-    // string tree_fname = "sample_tree_level_5_self_join_5182308.bin";
-    // string tree_fname = "sample_tree_level_2_self_join_99435462.bin";
-    string tree_bin_dir = dir_concat(tree_parent_dir, tree_fname);
+    string tree_bin_A_dir = argv[2];
+    string tree_bin_B_dir = argv[3];
 
-    // regex in c++: https://www.softwaretestinghelp.com/regex-in-cpp/
-    regex reg_level("level_[0-9]+");
-    regex reg_intersects("self_join_[0-9]+");
-
-    smatch level_match; 
-    smatch intersects_match; 
-   
-    // regex_search that searches pattern regexp in the string mystr  
-    regex_search(tree_fname, level_match, reg_level);
-    regex_search(tree_fname, intersects_match, reg_intersects);
-
-    string level_str; // = level_match.begin().str().substr(6);
-    string intersect_str; // = intersects_match.begin().str().substr(10);
-    for (auto x : level_match) level_str = x.str().substr(6);
-    for (auto x : intersects_match) intersect_str = x.str().substr(10);
-
-    max_level_A = stol(level_str);
-    max_level_B = stol(level_str);
-
-    long correct_intersect = stol(intersect_str);
-
-    cout << "Parsed tree level A : " << max_level_A << endl;
-    cout << "Parsed tree level B : " << max_level_B << endl;
-    cout << "Parsed intersect counts : " << correct_intersect << endl;
+    // cout << "Parsed tree level A : " << max_level_A << endl;
+    // cout << "Parsed tree level B : " << max_level_B << endl;
 
     // get data size from disk 
-    ifstream tree_fstream(
-        tree_bin_dir, ios::in | ios::binary);
-    tree_fstream.seekg(0, tree_fstream.end);
-    int64_t tree_bytes = tree_fstream.tellg();
-    tree_fstream.seekg(0, tree_fstream.beg);
-    cout << "Tree bytes: " << tree_bytes << endl;
+    ifstream tree_A_fstream(
+        tree_bin_A_dir, ios::in | ios::binary);
+    tree_A_fstream.seekg(0, tree_A_fstream.end);
+    int64_t tree_A_bytes = tree_A_fstream.tellg();
+    tree_A_fstream.seekg(0, tree_A_fstream.beg);
+    cout << "Tree A bytes: " << tree_A_bytes << endl;
+
+    ifstream tree_B_fstream(
+        tree_bin_B_dir, ios::in | ios::binary);
+    tree_B_fstream.seekg(0, tree_B_fstream.end);
+    int64_t tree_B_bytes = tree_B_fstream.tellg();
+    tree_B_fstream.seekg(0, tree_B_fstream.beg);
+    cout << "Tree B bytes: " << tree_B_bytes << endl;
 
     // allocate memory 
     cout << "Allocating memory...\n";
-    size_t bytes_page_A = tree_bytes;
-    size_t bytes_page_B = tree_bytes;
+    size_t bytes_page_A = tree_A_bytes;
+    size_t bytes_page_B = tree_B_bytes;
     vector<int ,aligned_allocator<int>> in_pages_A(bytes_page_A / sizeof(int), 0);
     vector<int ,aligned_allocator<int>> in_pages_B(bytes_page_B / sizeof(int), 0);
 
-    // size_t out_bytes = 10 * 1024 * 1024;
     size_t layer_cache_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
     cout << "layer_cache_bytes: " << layer_cache_bytes << endl;
     vector<int64_t ,aligned_allocator<int64_t>> layer_cache(layer_cache_bytes / sizeof(int64_t), 0);
 
-    // size_t out_bytes = 10 * 1024 * 1024;
-    size_t out_bytes = 1 * size_t(1000) * size_t(1000) * size_t(1000); // no more than 16 GB
+    // const int bias = 1 + N_JOIN_PE; // the first number writes total intersection count, the rest write tasks per PE
+    size_t out_bytes = (1 + N_JOIN_PE + sw_num_results) * 8 + 1024; // 8 byte per ap_uint<64>, 1024 = extra buffer
     cout << "out_bytes: " << out_bytes << endl;
     vector<int64_t ,aligned_allocator<int64_t>> out(out_bytes / sizeof(int64_t), 0);
 
     // load data from disk
-    tree_fstream.read((char*) in_pages_A.data(), tree_bytes);
-    if (!tree_fstream) {
-            cout << "error: only " << tree_fstream.gcount() << " could be read";
+    tree_A_fstream.read((char*) in_pages_A.data(), tree_A_bytes);
+    if (!tree_A_fstream) {
+            cout << "error: only " << tree_A_fstream.gcount() << " could be read";
         exit(1);
     }
-    memcpy(in_pages_B.data(), in_pages_A.data(), tree_bytes);
+    tree_B_fstream.read((char*) in_pages_B.data(), tree_B_bytes);
+    if (!tree_B_fstream) {
+            cout << "error: only " << tree_B_fstream.gcount() << " could be read";
+        exit(1);
+    }
 
     cout << "Root A info: " << endl;
     cout << "  is leaf: " << in_pages_A[0] << endl;
@@ -117,6 +118,8 @@ int main(int argc, char** argv)
     cout << "  count: " << in_pages_B[1] << endl;
 
 // OPENCL HOST CODE AREA START
+
+    cl_int err;
 
     vector<cl::Device> devices = get_devices();
     cl::Device device = devices[0];
@@ -163,17 +166,16 @@ int main(int argc, char** argv)
     OCL_CHECK(err, err = krnl_executor.setArg(2, int(root_id_A)));
     OCL_CHECK(err, err = krnl_executor.setArg(3, int(root_id_B)));
     OCL_CHECK(err, err = krnl_executor.setArg(4, int(page_bytes)));
-    OCL_CHECK(err, err = krnl_executor.setArg(12, buffer_in_pages_A));
-    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_in_pages_B));
-    OCL_CHECK(err, err = krnl_executor.setArg(17, buffer_layer_cache));
-    OCL_CHECK(err, err = krnl_executor.setArg(18, buffer_out));
+    OCL_CHECK(err, err = krnl_executor.setArg(5, int(max_entry_num)));
+    OCL_CHECK(err, err = krnl_executor.setArg(13, buffer_in_pages_A));
+    OCL_CHECK(err, err = krnl_executor.setArg(14, buffer_in_pages_B));
+    OCL_CHECK(err, err = krnl_executor.setArg(18, buffer_layer_cache));
+    OCL_CHECK(err, err = krnl_executor.setArg(19, buffer_out));
 
 
     // Copy input data to device global memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({
         // in
-        buffer_in_pages_A,
-        buffer_in_pages_B,
         buffer_layer_cache,
         buffer_out
         },0/* 0 means from host*/));
@@ -183,6 +185,11 @@ int main(int argc, char** argv)
     cout << "Launching kernel...\n";
     // Launch the Kernel
     auto start = chrono::high_resolution_clock::now();
+    OCL_CHECK(err, err = q.enqueueMigrateMemObjects({
+        // in
+        buffer_in_pages_A,
+        buffer_in_pages_B,
+        },0/* 0 means from host*/));
     OCL_CHECK(err, err = q.enqueueTask(krnl_scheduler));
     OCL_CHECK(err, err = q.enqueueTask(krnl_executor));
     q.finish();
@@ -196,13 +203,18 @@ int main(int argc, char** argv)
 
     cout << "Duration (including memcpy out): " << duration << " sec" << endl; 
 
-    if (out[0] == correct_intersect) {
+    if (out[0] == sw_num_results) {
         cout << endl << "Result correct!" << endl;
     } else {
         cout << endl << "Result wrong!" << endl;
     }
-    cout << "Parsed intersect count : " << correct_intersect << endl;
+    cout << "Parsed intersect count : " << sw_num_results << endl;
     cout << "FPGA computed intersect count : " << out[0] << endl;
+
+    for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
+        int task_count = out[1 + PE_id];
+        cout << "PE " << PE_id << " computes " << task_count << " page joins" << endl;
+    }
     
     return  0;
 }

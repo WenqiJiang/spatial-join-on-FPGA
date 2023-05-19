@@ -14,9 +14,9 @@
 
 // For hardware, maximum number of entries per page for a join PE
 //   each obj_t will be treat as 5 arrays in HLS, each with 4 byte elements
-//   	BRAM18Kbit -> 4096 x int
-//   this supports 4096 objects * 20 bytes ~= 80 KB page size
-#define MAX_PAGE_ENTRY_NUM 4096 
+//   	BRAM18Kbit -> 512 x int
+//   this supports 512 objects * 20 bytes ~= 10 KB page size
+#define MAX_PAGE_ENTRY_NUM 512 
 
 // join PE number
-#define N_JOIN_PE 8
+#define N_JOIN_PE 1
