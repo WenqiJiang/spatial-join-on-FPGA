@@ -1,0 +1,5 @@
+device_trace_0.csv  log_FPGA  log_cpp  log_tree_depth_A  log_tree_depth_B  perf_test.py  summary.csv  tree_A.bin  tree_B.bin  user_events.csv  xrt.ini  xrt.run_summary
+*csv
+log*
+*.bin
+*summary*

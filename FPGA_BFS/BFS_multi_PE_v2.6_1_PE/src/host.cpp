@@ -199,9 +199,9 @@ int main(int argc, char** argv)
     q.finish();
 
     auto end = chrono::high_resolution_clock::now();
-    double duration = (chrono::duration_cast<chrono::milliseconds>(end-start).count() / 1000.0);
+    double duration = (chrono::duration_cast<chrono::milliseconds>(end-start).count());
 
-    cout << "Duration (including memcpy out): " << duration << " sec" << endl; 
+    printf("Duration (including memcpy out): %.2lf ms", duration); 
 
     if (out[0] == sw_num_results) {
         cout << endl << "Result correct!" << endl;
