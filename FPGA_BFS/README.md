@@ -219,6 +219,7 @@ V2.5 merges the join PE with parsing the raw 512-byte page inputs. However, this
 
 * In V2.6, I add a parser before each join PE, such that the PE can still focus on the join by consuming already parsed data.
 * I connect two node input to the same DRAM bank, and the two result writing to the same DRAM bank. Such that read is not disturbed by writes (the two writes does not happen simultaneously). 
+* Updated host to take input arguments. 
 
 #### Potential further optimization
 

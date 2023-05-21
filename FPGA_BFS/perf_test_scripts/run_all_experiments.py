@@ -20,12 +20,12 @@ Output Json format:
 Example Usage:
 python run_all_experiments.py \
 --out_json_fname FPGA_perf.json \
---overwrite 1 \
+--overwrite 0 \
 --FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.6_1_PE \
 --cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out \
 --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py \
 --C_file_dir /mnt/scratch/wenqi/spatial-join-baseline/generated_data \
---max_entry_size 16 --num_runs 3
+--max_entry_size 16 --num_runs 1 > log_run_all_experiments
 
 """
 import os
@@ -86,12 +86,46 @@ def parse_perf_result(fname, num_runs):
         kernel_time_ms.append(get_number_file_with_keywords(fname, kernel_keyword, "float"))
     return time_ms, kernel_time_ms
 
+def config_exist_in_dict(json_dict, 
+            dataset, join_type, size_dataset_A, size_dataset_B, max_entry_size):
+    """
+    Given the input dict and some config, check whether the entry is in the dict
+
+    Note: the key are all in string format in json
+
+    Return: True (already exist) or False (not exist)
+    """
+    size_dataset_A = str(size_dataset_A)
+    size_dataset_B = str(size_dataset_B)
+    max_entry_size = str(max_entry_size)
+    if dataset not in json_dict:
+        return False
+    if join_type not in json_dict[dataset]:
+        return False
+    if size_dataset_A not in json_dict[dataset][join_type]:
+        return False
+    if size_dataset_B not in json_dict[dataset][join_type][size_dataset_A]:
+        return False
+    if max_entry_size not in json_dict[dataset][join_type][size_dataset_A][size_dataset_B]:
+        return False
+    if "num_results" in json_dict[dataset][join_type][size_dataset_A][size_dataset_B][max_entry_size] and \
+        "time_ms" in json_dict[dataset][join_type][size_dataset_A][size_dataset_B][max_entry_size] and \
+        "kernel_time_ms" in json_dict[dataset][join_type][size_dataset_A][size_dataset_B][max_entry_size]:
+        return True
+    else:
+        return False
+
 def write_json(fname, overwrite, json_dict, 
             dataset, join_type, size_dataset_A, size_dataset_B, max_entry_size,
             num_results, time_ms, kernel_time_ms):
     """
     write the json dictionary, given the input information
+    
+    Note: the key are all in string format in json
     """
+    size_dataset_A = str(size_dataset_A)
+    size_dataset_B = str(size_dataset_B)
+    max_entry_size = str(max_entry_size)
     if dataset not in json_dict:
         json_dict[dataset] = dict()
     if join_type not in json_dict[dataset]:
@@ -148,7 +182,24 @@ for dataset in datasets:
                 C_file_A = os.path.join(C_file_dir, file_A)
                 C_file_B = os.path.join(C_file_dir, file_B)
 
+                """ Now the FPGA has bugs when the first tree level > second tree"""
+                def swap(name1, name2):
+                    return name2, name1
+                
+                if size_dataset_A > size_dataset_B:
+                    C_file_A, C_file_B = swap(C_file_A, C_file_B)
+
                 for max_entry_size in max_entry_sizes:
+                    
+                    print("", flush=True)
+                    print(f"Config: dataset:{dataset}, join_type:{join_type}, size_dataset_A:{size_dataset_A}, size_dataset_B:{size_dataset_B}, max_entry_size:{max_entry_size}")
+                    # check whether to run
+                    if not overwrite and \
+                        config_exist_in_dict(json_dict, 
+                            dataset, join_type, size_dataset_A, size_dataset_B, max_entry_size):
+                        print("Skip, already in dict")
+                        continue
+                    
                     log_perf_test = 'log_perf_test'
                     cmd_perf_test = "python perf_test.py " + \
                         f" --FPGA_project_dir {FPGA_project_dir} " + \
@@ -172,3 +223,4 @@ for dataset in datasets:
                     write_json(out_json_fname, overwrite, json_dict, 
                         dataset, join_type, size_dataset_A, size_dataset_B, max_entry_size,
                         num_results, time_ms, kernel_time_ms)
+                    
