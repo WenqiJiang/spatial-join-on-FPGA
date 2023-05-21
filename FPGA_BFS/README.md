@@ -217,9 +217,8 @@ Placement & Routing
 
 V2.5 merges the join PE with parsing the raw 512-byte page inputs. However, this lead to significant slow down in performance. This also lead to frequency drop at 200 MHz (achieved 169), which does not appear in V2.4 (either due to the more complex join PE, or because the reduced usage of URAM and increasing usage in BRAM due to the reduced hardware page size limit).
 
-In V2.6, I add a parser before each join PE, such that the PE can still focus on the join by consuming already parsed data.
-
-For the 1 PE version on binary R-tree, V2.6 consumes 87% of time than V2.4 using a single PE.
+* In V2.6, I add a parser before each join PE, such that the PE can still focus on the join by consuming already parsed data.
+* I connect two node input to the same DRAM bank, and the two result writing to the same DRAM bank. Such that read is not disturbed by writes (the two writes does not happen simultaneously). 
 
 #### Potential further optimization
 

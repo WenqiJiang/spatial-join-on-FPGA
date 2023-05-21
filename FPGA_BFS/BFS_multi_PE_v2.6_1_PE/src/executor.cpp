@@ -79,9 +79,9 @@ void executor(
 #pragma HLS stream variable=s_page_B_raw depth=512
 
     hls::stream<node_meta_t> s_meta_A[N_JOIN_PE];
-#pragma HLS stream variable=s_meta_A depth=2
+#pragma HLS stream variable=s_meta_A depth=8
     hls::stream<node_meta_t> s_meta_B[N_JOIN_PE];
-#pragma HLS stream variable=s_meta_B depth=2
+#pragma HLS stream variable=s_meta_B depth=8
 
     hls::stream<obj_t> s_page_A[N_JOIN_PE];
 #pragma HLS stream variable=s_page_A depth=512
@@ -89,16 +89,16 @@ void executor(
 #pragma HLS stream variable=s_page_B depth=512
 
     hls::stream<int> s_join_PE_idle[N_JOIN_PE]; 
-#pragma HLS stream variable=s_join_PE_idle depth=2
+#pragma HLS stream variable=s_join_PE_idle depth=512
 
     hls::stream<int> s_intersect_count_directory[N_JOIN_PE];
-#pragma HLS stream variable=s_intersect_count_directory depth=2
+#pragma HLS stream variable=s_intersect_count_directory depth=512
 
     hls::stream<result_t> s_result_pair_directory[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_directory depth=1024
 
     hls::stream<int> s_intersect_count_leaf[N_JOIN_PE]; 
-#pragma HLS stream variable=s_intersect_count_leaf depth=2
+#pragma HLS stream variable=s_intersect_count_leaf depth=512
 
     hls::stream<result_t> s_result_pair_leaf[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_leaf depth=1024

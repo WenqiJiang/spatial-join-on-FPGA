@@ -14,7 +14,7 @@ python perf_test.py \
 --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py \
 --C_file_A /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_0_set_0.txt \
 --C_file_B /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_1_set_0.txt \
---max_entry_size 16 
+--max_entry_size 16 --num_runs 3
 """
 
 import os
@@ -22,7 +22,7 @@ import re
 import numpy as np
 import argparse 
 
-from typing import Optional
+from utils import assert_keywords_in_file, get_number_file_with_keywords
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--FPGA_project_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.6_1_PE')
@@ -32,8 +32,9 @@ parser.add_argument('--FPGA_log_name', type=str, default='summary.csv', help="th
 parser.add_argument('--cpp_exe_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out', help="the CPP exe file")
 parser.add_argument('--C_file_A', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_0_set_0.txt', help="the CPP input file")
 parser.add_argument('--C_file_B', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_1_set_0.txt', help="the CPP input file")
-parser.add_argument('--max_entry_size', type=int, default=32, help="the max entry numbers in an R tree node")
 parser.add_argument('--get_tree_depth_py_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py', help="the get tree depth file dir")
+parser.add_argument('--max_entry_size', type=int, default=32, help="the max entry numbers in an R tree node")
+parser.add_argument('--num_runs', type=int, default=1, help="number of FPGA runs")
 
 args = parser.parse_args()
 FPGA_project_dir = args.FPGA_project_dir
@@ -45,40 +46,8 @@ C_file_A = args.C_file_A
 C_file_B = args.C_file_B
 max_entry_size = args.max_entry_size
 get_tree_depth_py_dir = args.get_tree_depth_py_dir
+num_runs = args.num_runs
 
-def assert_keywords_in_file(fname, keyword):
-	"""
-	Given an input text file, assert there is at least a line that contains a keyword
-	"""
-	with open(fname) as f:
-		lines = f.readlines()
-		for line in lines:
-			if keyword in line:
-				return True
-	return False
-
-def get_number_file_with_keywords(fname, keyword, dtype='int'):
-	"""
-	Given an input text file, find the line that contains a keyword,
-		and extract the first number (int or float)
-	"""
-	assert dtype == 'int' or dtype == 'float'
-	if dtype == 'int':
-		pattern = r"\d+"
-	elif dtype == 'float':
-		pattern = r"(\d+.\d+)"
-
-	result = None
-	with open(fname) as f:
-		lines = f.readlines()
-		for line in lines:
-			if keyword in line:
-				result = re.findall(pattern, line)[0]
-	assert result is not None
-	if dtype == 'int':
-		return int(result)
-	elif dtype == 'float':
-		return float(result)
 
 def get_tree_depth_procedure(tree="A"):
 	"""
@@ -152,22 +121,23 @@ if __name__ == '__main__':
 	print("Level B: ", level_B)
 
 	# Third, run FPGA
-	"""
-	std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
-	"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
-	"""
-	host_full = os.path.join(FPGA_project_dir, FPGA_host_name)
-	xclbin_full = os.path.join(FPGA_project_dir, FPGA_bin_name)
-	tree_A_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_A.bin')
-	tree_B_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_B.bin')
-	log_FPGA = 'log_FPGA'
-	cmd_FPGA = f"{host_full} {xclbin_full} {tree_A_dir} {tree_B_dir} {level_A} {level_B} {max_entry_size} {num_results} > {log_FPGA}"
-	print("Executing FPGA command:\n", cmd_FPGA)
-	os.system(cmd_FPGA)
-	
-	assert assert_keywords_in_file(log_FPGA, "Result correct!") == True
-	time_ms_FPGA_e2e = get_number_file_with_keywords(log_FPGA, "Duration (including memcpy out):", "float")
-	print("FPGA end-to-end: {} ms".format(time_ms_FPGA_e2e))
-	time_ms_executor, time_ms_scheduler = get_FPGA_summary_time(FPGA_log_name)
-	time_ms_FPGA_kernel = np.amax([time_ms_executor, time_ms_scheduler])
-	print("FPGA kernel: {} ms".format(time_ms_FPGA_kernel))
+	for run_id in range(num_runs):
+		"""
+		std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
+		"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
+		"""
+		host_full = os.path.join(FPGA_project_dir, FPGA_host_name)
+		xclbin_full = os.path.join(FPGA_project_dir, FPGA_bin_name)
+		tree_A_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_A.bin')
+		tree_B_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_B.bin')
+		log_FPGA = 'log_FPGA'
+		cmd_FPGA = f"{host_full} {xclbin_full} {tree_A_dir} {tree_B_dir} {level_A} {level_B} {max_entry_size} {num_results} > {log_FPGA}"
+		print("Executing FPGA command:\n", cmd_FPGA)
+		os.system(cmd_FPGA)
+		
+		assert assert_keywords_in_file(log_FPGA, "Result correct!") == True
+		time_ms_FPGA_e2e = get_number_file_with_keywords(log_FPGA, "Duration (including memcpy out):", "float")
+		print("Run {} FPGA end-to-end: {} ms".format(run_id, time_ms_FPGA_e2e))
+		time_ms_executor, time_ms_scheduler = get_FPGA_summary_time(FPGA_log_name)
+		time_ms_FPGA_kernel = np.amax([time_ms_executor, time_ms_scheduler])
+		print("Run {} FPGA kernel: {} ms".format(run_id, time_ms_FPGA_kernel))
