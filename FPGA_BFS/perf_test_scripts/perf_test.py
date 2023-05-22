@@ -86,10 +86,18 @@ def get_FPGA_summary_time(fname):
 		for line in lines:
 			if executor_keyword in line:
 				new_line = line.replace(executor_keyword, "")
-				time_ms_executor = float(re.findall(pattern, new_line)[0])
+				time_ms_executor = re.findall(pattern, new_line)[0]
+				if '.' in time_ms_executor:
+					time_ms_executor = float(time_ms_executor)
+				else: # only has int part, e.g., 1146,1146
+					time_ms_executor = float(re.findall(r"\d+", time_ms_executor)[0])
 			elif scheduler_keyword in line:
 				new_line = line.replace(scheduler_keyword, "")
-				time_ms_scheduler = float(re.findall(pattern, new_line)[0])
+				time_ms_scheduler = re.findall(pattern, new_line)[0]
+				if '.' in time_ms_scheduler:
+					time_ms_scheduler = float(time_ms_scheduler)
+				else: # only has int part, e.g., 1146,1146
+					time_ms_scheduler = float(re.findall(r"\d+", time_ms_scheduler)[0])
 	assert time_ms_executor is not None
 	assert time_ms_scheduler is not None 
 

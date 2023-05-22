@@ -221,6 +221,26 @@ V2.5 merges the join PE with parsing the raw 512-byte page inputs. However, this
 * I connect two node input to the same DRAM bank, and the two result writing to the same DRAM bank. Such that read is not disturbed by writes (the two writes does not happen simultaneously). 
 * Updated host to take input arguments. 
 
+A potential bug to fix:
+```
+		// should be || rather than &&
+        if (!s_page_A_raw.empty() && !s_page_B_raw.empty()) {
+        else if (!s_join_finish_in.empty()) {
+```
+
+**Known Issue: results = 0 when Tree depth A > Tree depth B, so we should always make sure we start with the smaller or equal sized dataset first**
+
+Example:
+
+1M point x 100K polygon, max entry =64 -> bug, FPGA return 0
+
+1 PE, 2 PE, 16 PE -> all 0 results
+
+python perf_test.py  --FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.6_1_PE  --FPGA_host_name host  --FPGA_bin_name xclbin/vadd.hw.xclbin  --FPGA_log_name summary.csv  --cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out  --C_file_A /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_1000000_point_file_0.txt --C_file_B /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_0_set_0.txt --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py  --max_entry_size 64  --num_runs 1  > log_perf_test
+
+level A: 4
+level B: 3
+
 #### Potential further optimization
 
 * change the workload -> it should join pages of at least hundreds of entries, not using the current workload with just 16 MBRs. 

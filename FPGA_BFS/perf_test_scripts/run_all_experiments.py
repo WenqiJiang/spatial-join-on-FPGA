@@ -3,7 +3,7 @@ This script runs perf_test.py to execute a number of experiments
 
 Output Json format:
     perf_set = dict[dataset][join type (Point-in-Polygon or Polygon-Polygon)][size_dataset_A][size_dataset_B][max_entry_size]
-    perf_set = {num_results: ..., time: [], kernel_time: []} -> size of the time array == number of runs
+    perf_set = {num_results: ..., time_ms: [], kernel_time_ms: []} -> size of the time array == number of runs
 
     dataset = ("Uniform", "OSM")
     join type = ("Point-in-Polygon", "Polygon-Polygon")
@@ -25,7 +25,7 @@ python run_all_experiments.py \
 --cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out \
 --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py \
 --C_file_dir /mnt/scratch/wenqi/spatial-join-baseline/generated_data \
---max_entry_size 16 --num_runs 1 > log_run_all_experiments
+--num_runs 3 > log_run_all_experiments
 
 """
 import os
@@ -47,7 +47,6 @@ parser.add_argument('--FPGA_log_name', type=str, default='summary.csv', help="th
 parser.add_argument('--cpp_exe_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out', help="the CPP exe file")
 parser.add_argument('--C_file_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/generated_data', help="the CPP input file")
 parser.add_argument('--get_tree_depth_py_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py', help="the get tree depth file dir")
-parser.add_argument('--max_entry_size', type=int, default=32, help="the max entry numbers in an R tree node")
 parser.add_argument('--num_runs', type=int, default=1, help="number of FPGA runs")
 
 args = parser.parse_args()
@@ -60,7 +59,6 @@ FPGA_bin_name = args.FPGA_bin_name
 FPGA_log_name = args.FPGA_log_name
 cpp_exe_dir = args.cpp_exe_dir
 C_file_dir = args.C_file_dir
-max_entry_size = args.max_entry_size
 get_tree_depth_py_dir = args.get_tree_depth_py_dir
 num_runs = args.num_runs
 
