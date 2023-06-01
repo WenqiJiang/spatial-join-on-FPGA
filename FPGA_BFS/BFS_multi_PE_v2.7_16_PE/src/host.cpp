@@ -11,6 +11,7 @@ std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBi
 
 #include <stdint.h>
 #include <chrono>
+#include <cassert>
 #include <regex> 
 
 #include "host.hpp"
@@ -50,6 +51,7 @@ int main(int argc, char** argv)
     int root_id_B = 0;
     int max_level_A = stoi(argv[4]);
     int max_level_B = stoi(argv[5]);
+	assert (max_level_A <= max_level_B);
     int page_bytes = 4096; // page size -> used in the index bin
 	int max_entry_num = stoi(argv[6]);   // max number of entries per page (set by CPU)
 	long sw_num_results = stoi(argv[7]);

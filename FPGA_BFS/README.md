@@ -228,6 +228,37 @@ A potential bug to fix:
         else if (!s_join_finish_in.empty()) {
 ```
 
+V2.6 Performance Analysis:
+
+Tested on PIP on OSM, which yields very little results.
+
+python perf_test.py \
+--FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.6_16_PE_250_2 \
+--cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp_old/a.out \
+--get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py \
+--C_file_A /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_OSM_10000000_point_file_0.txt \
+--C_file_B /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_OSM_10000000_polygon_file_0.txt \
+--max_entry_size 16 --num_runs 1
+
+Page size = 64
+	805.61 ms
+	PE 0 computes 27973 page joins
+	27973 / 0.805 = 34749 pages per sec
+	theoretical perf 1 /  (64 * 64 / (206 * 1e6)) = 50292 pages per sec, so maybe still some space for improvement
+	is this because of DRAM input or the task scheduler?
+	DRAM input: 27973 * 16 * 4096 / 1e9 = 1.8 GB/s per input channel, seems this is not the bottleneck
+	Read performance: suppose a read latency = 20 cycles, 64 entry ~= 1 header + 22 64-byte = 23 cycles -> 43 cycles, theoretical read performance = 1 /  (43  / (206 * 1e6)) = 4790697 -> per PE: 4790697 / 16 = 299,418 -> still 6x more than the per PE performance	
+	maybe increase pair_cache_size from 32 -> ??? 32 only last for two rounds of assignment, but setting it to something as large as 1024 can also create idle bubble for join units to wait this read finish -> but seems to be fine overall
+
+Page size = 16
+	2154.33 ms
+	PE 0 computes 103230 page joins
+	103230 / 2.154 = 47,924 pages per sec <<< theoretical perf 1 /  (16 * 16 / (206 * 1e6)) 804,687 -> 20x compute gap
+	Read performance: suppose a read latency = 20 cycles, 16 entry ~= 1 header + 6 64-byte = 7 cycles -> 27 cycles, theoretical read performance = 1 /  (27  / (206 * 1e6)) = 7,629,629 -> per PE: 7629629 / 16 = 476,851 -> still 10x more than the per PE performance	
+
+Performance conclusion: for small page size of 16, it is far from achieving FPGA's max bandwidth, even if we count the read latency. This means there are bubbles in the read-join-write pipeline such that the performance is not maximized. For larger page size of 64, it achieves around 65% of theoretical compute performance, meaning that the pipeline bubble is still there.
+
+
 **Known Issue: results = 0 when Tree depth A > Tree depth B, so we should always make sure we start with the smaller or equal sized dataset first**
 
 Example:
@@ -240,6 +271,15 @@ python perf_test.py  --FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/
 
 level A: 4
 level B: 3
+
+### V2.7
+
+* Add input tree depth check, depth A must <= depth B.
+* Use a max work count per join PE, rather than waiting for the PE to finish until the next task assignment can begin.
+* Increase the task cache from 32 to 128 (the cache load latency is covered by the busy join PEs)
+* Increase data FIFO size from 512 to 1024
+* Increase the between-kernel FIFO size in the vivado.cfg file from 64 to 1024
+* Fix `if (!s_page_A_raw.empty() && !s_page_B_raw.empty())` -> `if (!s_page_A_raw.empty() || !s_page_B_raw.empty())`
 
 #### Potential further optimization
 
