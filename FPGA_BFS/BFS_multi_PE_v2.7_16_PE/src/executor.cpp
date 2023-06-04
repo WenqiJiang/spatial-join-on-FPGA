@@ -74,43 +74,43 @@ void executor(
 
 
     hls::stream<ap_uint<512> > s_page_A_raw[N_JOIN_PE];
-#pragma HLS stream variable=s_page_A_raw depth=1024
+#pragma HLS stream variable=s_page_A_raw depth=512
     hls::stream<ap_uint<512> > s_page_B_raw[N_JOIN_PE];
-#pragma HLS stream variable=s_page_B_raw depth=1024
+#pragma HLS stream variable=s_page_B_raw depth=512
 
     hls::stream<node_meta_t> s_meta_A[N_JOIN_PE];
-#pragma HLS stream variable=s_meta_A depth=1024
+#pragma HLS stream variable=s_meta_A depth=8
     hls::stream<node_meta_t> s_meta_B[N_JOIN_PE];
-#pragma HLS stream variable=s_meta_B depth=1024
+#pragma HLS stream variable=s_meta_B depth=8
 
     hls::stream<obj_t> s_page_A[N_JOIN_PE];
-#pragma HLS stream variable=s_page_A depth=1024
+#pragma HLS stream variable=s_page_A depth=512
     hls::stream<obj_t> s_page_B[N_JOIN_PE];
-#pragma HLS stream variable=s_page_B depth=1024
+#pragma HLS stream variable=s_page_B depth=512
 
     hls::stream<int> s_join_PE_idle[N_JOIN_PE]; 
-#pragma HLS stream variable=s_join_PE_idle depth=1024
+#pragma HLS stream variable=s_join_PE_idle depth=512
 
     hls::stream<int> s_intersect_count_directory[N_JOIN_PE];
-#pragma HLS stream variable=s_intersect_count_directory depth=1024
+#pragma HLS stream variable=s_intersect_count_directory depth=512
 
     hls::stream<result_t> s_result_pair_directory[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_directory depth=1024
 
     hls::stream<int> s_intersect_count_leaf[N_JOIN_PE]; 
-#pragma HLS stream variable=s_intersect_count_leaf depth=1024
+#pragma HLS stream variable=s_intersect_count_leaf depth=512
 
     hls::stream<result_t> s_result_pair_leaf[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_leaf depth=1024
 
     hls::stream<int> s_result_pair_leaf_burst_length[N_JOIN_PE];
-#pragma HLS stream variable=s_result_pair_leaf_burst_length depth=1024
+#pragma HLS stream variable=s_result_pair_leaf_burst_length depth=512
 
     hls::stream<result_t> s_result_pair_leaf_burst[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_leaf_burst depth=1024
 
     hls::stream<int> s_result_pair_directory_burst_length[N_JOIN_PE];
-#pragma HLS stream variable=s_result_pair_directory_burst_length depth=1024
+#pragma HLS stream variable=s_result_pair_directory_burst_length depth=512
 
     hls::stream<result_t> s_result_pair_directory_burst[N_JOIN_PE];
 #pragma HLS stream variable=s_result_pair_directory_burst depth=1024

@@ -10,7 +10,7 @@ Example Usage:
 
 python perf_test.py \
 --FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.6_1_PE \
---cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out \
+--cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp/FPGA_index_constructor \
 --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py \
 --C_file_A /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_0_set_0.txt \
 --C_file_B /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_1_set_0.txt \
@@ -29,7 +29,7 @@ parser.add_argument('--FPGA_project_dir', type=str, default='/mnt/scratch/wenqi/
 parser.add_argument('--FPGA_host_name', type=str, default='host', help="the name of the exe of the FPGA host")
 parser.add_argument('--FPGA_bin_name', type=str, default='xclbin/vadd.hw.xclbin', help="the name (as well as the subdir) of the FPGA bitstream")
 parser.add_argument('--FPGA_log_name', type=str, default='summary.csv', help="the name of the FPGA perf summary file")
-parser.add_argument('--cpp_exe_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/cpp/a.out', help="the CPP exe file")
+parser.add_argument('--cpp_exe_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/cpp/FPGA_index_constructor', help="the CPP exe file")
 parser.add_argument('--C_file_A', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_0_set_0.txt', help="the CPP input file")
 parser.add_argument('--C_file_B', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_uniform_100000_polygon_file_1_set_0.txt', help="the CPP input file")
 parser.add_argument('--get_tree_depth_py_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py', help="the get tree depth file dir")

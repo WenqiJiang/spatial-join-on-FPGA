@@ -277,9 +277,65 @@ level B: 3
 * Add input tree depth check, depth A must <= depth B.
 * Use a max work count per join PE, rather than waiting for the PE to finish until the next task assignment can begin.
 * Increase the task cache from 32 to 128 (the cache load latency is covered by the busy join PEs)
-* Increase data FIFO size from 512 to 1024
-* Increase the between-kernel FIFO size in the vivado.cfg file from 64 to 1024
+// * Increase data FIFO size from 512 to 1024 -> rolled back, routing error
+// * Increase the between-kernel FIFO size in the vivado.cfg file from 64 to 1024 -> rolled back, routing error
 * Fix `if (!s_page_A_raw.empty() && !s_page_B_raw.empty())` -> `if (!s_page_A_raw.empty() || !s_page_B_raw.empty())`
+
+Results:
+* Limited performance improvement over 2.6 -> Probably because the scheduling logic is too complex, thus taking a lot of cycles to send tasks out. 
+* When the number of tasks is large, it can run into deadlock -> still not sure why
+
+```
+16, max activa task 1 = 0: 2734.43 ms
+16, max activa task 2 = 2561.69 ms
+16, max activa task 3 = 2630.41 ms
+16, max activa task 4 -> deadlock?
+
+32, max activa task 1 = 1382.52 ms
+32, max activa task 2 = 1325.33 ms
+
+64, max activa task 1 = 956.53 ms
+64, max activa task 2 = 922.97 ms
+```
+
+### V2.8
+
+In 2.7, we inspect that the dynamic scheduling policy is a big overhead in the scheduler, resulting in insufficient workload per join PE. Thus, in 2.8, we use a static policy instead to assign exactly the same number of tasks to each PE. Given that all the non-root-level nodes should be mostly full (each join task has similar workload), the imbalance time consumption per PE should be minimal. 
+
+* rewrite scheduler
+* remove the PE idle signal
+
+Performance: 
+
+1 PE, page size = 16:
+
+	python perf_test.py --FPGA_project_dir /mnt/scratch/wenqi/spatial-join-on-FPGA/FPGA_BFS/BFS_multi_PE_v2.8_1_PE --cpp_exe_dir /mnt/scratch/wenqi/spatial-join-baseline/cpp_old/a.out --get_tree_depth_py_dir /mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py --C_file_A /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_OSM_10000000_point_file_0.txt --C_file_B /mnt/scratch/wenqi/spatial-join-baseline/generated_data/C_OSM_10000000_polygon_file_0.txt --max_entry_size 16 --num_runs 1
+
+	PE 0 computes 1651630 page joins
+	Run 0 FPGA end-to-end: 3195.67 ms
+	Run 0 FPGA kernel: 3191.22 ms
+
+	1651630 / 3.191 = 517,590 pages per sec; theoretical perf 1 / ((16 * 16 + 16 + 73) / (200 * 1e6)) = 579,710 -> very close
+	Read performance: suppose a read latency = 50 cycles, 16 entry ~= 1 header + 6 64-byte = 7 cycles -> 57 cycles, theoretical read performance = 1 /  (57  / (200 * 1e6)) = 3,508,771 -> per PE: 3,508,771 / 1 = 3,508,771 -> can support up to 6 PEs
+
+2 PE, page size = 16: 2164.98 ms
+	-> already not very scalable! Thus the scheduling policy is not the reason? What's the reason then? Is the read unit's burst read, or the feedback loop per layer that yields extra coordination overhead? Or the static scheduling itself is bad?
+
+8 PE, page size = 16: 2166.98 ms
+
+### V2.9
+
+In V2.8, we inspect that the read unit is actually not optimized, either due to the AXIS interface or somehow burst is not inferred. In V2.9 we handle AXIS signal in another PE, and use an individual PE to select join unit.
+
+My suspiction is that the old code reading simultaneously from 2 DRAM bank will not lead to burst read:
+
+```
+	for (int i = 0; i < axi_per_page; i++) {
+#pragma HLS pipeline II=1
+		s_page_A_raw[join_PE_ID].write(in_pages_A[start_addr_A + i]);
+		s_page_B_raw[join_PE_ID].write(in_pages_B[start_addr_B + i]);
+		}
+```
 
 #### Potential further optimization
 

@@ -61,6 +61,7 @@ int main(int argc, char** argv)
 		std::cout << "axi_per_page * 64 > page_bytes";
 		exit(1);
 	}
+	int max_active_task_per_PE = 16; // data FIFO depth = 1024, page size up to 4096B = 64 x AXI
 
     string tree_bin_A_dir = argv[2];
     string tree_bin_B_dir = argv[3];
@@ -166,6 +167,7 @@ int main(int argc, char** argv)
     // in 
     OCL_CHECK(err, err = krnl_scheduler.setArg(0, int(max_level_A)));
     OCL_CHECK(err, err = krnl_scheduler.setArg(1, int(max_level_B)));
+    OCL_CHECK(err, err = krnl_scheduler.setArg(2, int(max_active_task_per_PE)));
 
     OCL_CHECK(err, err = krnl_executor.setArg(0, int(max_level_A)));
     OCL_CHECK(err, err = krnl_executor.setArg(1, int(max_level_B)));

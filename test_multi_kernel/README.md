@@ -281,3 +281,16 @@ Has FIFO depth.
 No empty check.
 
 Succeed. 
+
+### multi_kernel_different_speed_trial_1
+
+Given that the write FIFO writes data much after than the consumer (without checking whether the axis FIFO is full), check whether the program will stuck.
+
+Results: succeed -> so only read needs empty check
+
+
+### multi_kernel_different_speed_trial_2
+
+Same as 1, but with full FIFO check.
+
+Succeed.
