@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     std::cout << "Allocating memory...\n";
 
-	int total_iter = 1000;
+	int total_iter = 1000 * 1000;
 	int read_len = 8;
 
     size_t bytes_input = 1024 * 1024 * 1024;

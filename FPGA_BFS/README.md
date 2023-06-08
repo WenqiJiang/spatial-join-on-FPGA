@@ -337,6 +337,179 @@ My suspiction is that the old code reading simultaneously from 2 DRAM bank will 
 		}
 ```
 
+Performance: Limited improvement over 2.8.
+### V2.10 
+
+Forked from V2.8. Using burst read AXI and prefetch multiple pages. 
+
+Performance: Limited improvement over 2.8. 2027.55 ms for 16 PE, 16 page size, OSM PIP 10M x 10M.
+
+Analysis: maybe the bottleneck is not on the read side, but on the write size (layer cache controller and write manager).
+
+I used tracked some data in the cpp bfs for OSM PIP 10M x 10M:
+
+Building RTree for trace 1: 10717.19 ms
+Building RTree for trace 2: 13169.71 ms
+New level size: 19
+New level size: 365
+New level size: 15368
+New level size: 276958
+New level size: 1358919
+New level size: 0
+BFS + dynamic duration: 894.54 ms
+Number of results (BFS + dynamic): 12407
+
+So there are actually quite some write operations
+
+but even if we consider all the writes, each in individual random write:
+
+(19 + 365 + 15368 + 276958 + 1358919 + 12407) * (300 * 1e-9) = 0.5 s -> not 2 sec
+
+### V2.11
+
+Upon V2.10, improve write functionality by using manual write bursts in both layer controller and write unit. 
+
+1Mx1M OSM PIP:
+1 PE, page size = 16, 307.1 ms
+PE 0 computes 155844 page joins -> 155844 / 0.307 = 507,635 tasks / sec
+2 PE, page size = 16, 198.83 ms
+computes 155844 page joins -> 155844 / 0.198 = 787,090 tasks / sec
+
+1 PE, page size = 8, 317.27 ms
+PE 0 computes 317633 page joins -> 317633 / 0.317 = 1,001,996 tasks / sec
+2 PE, page size = 8, 318.04 ms -> same tasks / sec
+
+1 PE, page size = 4, 655.78 ms
+PE 0 computes 550423 page joins -> 550423 / 0.65 =  846,804 tasks / sec
+2 PE, page size = 8, 654.15 ms -> same tasks / sec
+
+**So probably ~1M tasks / sec is the limit of the FPGA control logic (200 cycles / task which still sounds quite high). Question, what is the thing in the pipeline that creates this 200 cycle overhead? Read/write, or other stuff?**
+
+**Also, adding more PEs do not degrade performance probably means that looping over these PEs in a control logic is not the bottleneck -> then the bottleneck should still be read or write, and given that the read, in the microbenchmark, should consume less than 100 cycles, the write could be the bottleneck**
+
+page size = 32, 10Mx10M OSM -> 843,162 tasks -> probably needs around 0.8 sec. -> in reality it takes 800.54 ms
+
+page size = 48, 10Mx10M OSM -> 572,208 tasks -> probably needs around 0.6 sec. -> in reality it takes 704.173 ms
+
+page size = 64, 10Mx10M OSM -> 447,568 tasks -> probably needs around 0.5 sec., but compute takes more -> in reality it takes 791.81 ms
+
+### V2.12 
+
+Compare to V2.11:
+* Further optimize write by combining multiple writes into a single write, given that we write data into consecutive addresses.
+* Increase task cache size from 128 to 1024, as well as the inter-kernel signals (axis_page_pair_scheduler, axis_page_ID_pair_read_nodes, axis_join_PE_ID)
+* Increase the s_meta FIFO size from 8 to 512
+
+Perf:
+very similar 1Mx1M OSM PIP 1 PE performance to V2.11 -> thus write should not be on the critical path, and something else is the 200 cycle critical path in the pipeline.
+
+To see which stage is the bottleneck, I tried two thing:
+
+1. BFS_multi_PE_v2.12_2_PE_more_write_channels, use different channels for write unit and layer cache manager -> no improvement.
+
+2. BFS_multi_PE_v2.12_2_PE_less_read_channels, use only one read channel to see if performance decrease by the random access latency. 
+
+Before: 653.02 ms (550423 pages), now 842.69 ms, suppose latency = 300 ns. 653.02 + 300 * 1e-6 * 550423 = 653 + 165 = 818 ms. **So indeed read is the bottleneck, because if there is another outstanding bottleneck in the pipeline, the increased read latency can be hided. But given that random read only consumes 300 ns, why in reality, it's so slow?**
+
+
+Change the read/write latency:
+
+If we set latency = 0, this means default = 64. 
+
+(default latency) 1 PE, page size = 16, 307.1 ms
+PE 0 computes 155844 page joins -> 155844 / 0.307 = 507,635 tasks / sec
+(default latency) 2 PE, page size = 16, 198.83 ms
+computes 155844 page joins -> 155844 / 0.198 = 787,090 tasks / sec
+(latency = 32)    2 PE, page size = 16, 197.35 ms -> somehow no improvement here, bottleneck is elsewhere? maybe the layer scheduler? 
+(latency = 16)    2 PE, page size = 16, 197.43 ms -> somehow no improvement here, bottleneck is elsewhere?
+(latency = 16 reorder join PE ID read and mem channel)    2 PE, page size = 16, 198.76 ms -> same as normal latency = 16
+(latency = 1 only for write)     2 PE, page size = 16, 198.49 ms  -> same as all others
+(latency = 1 only for layer cache)     2 PE, page size = 16, 199.59 ms  -> same as all others
+(latency = 1 only for read)    2 PE, page size = 16,  198.34 ms -> a little bit slower than all latency = 1
+(latency = 1)    2 PE, page size = 16,  197.74 ms -> somehow no improvement here, bottleneck is elsewhere?
+(latency = 1)    16 PE @189 MHz, page size = 16, 107.0 ms -> somehow this is faster than 2 PEs -> maybe due to merged writes? or maybe more PEs means longer total FIFO sizes?  Also, this achieves 155844 / 0.107 = 1456485 tasks per sec -> 130 cycles per task
+
+(default latency) 1 PE, page size = 8, 317.27 ms
+PE 0 computes 317633 page joins -> 317633 / 0.317 = 1,001,996 tasks / sec
+(default latency) 2 PE, page size = 8, 318.04 ms -> same tasks / sec
+(latency = 32)    2 PE, page size = 8, 264.524 ms -> 32 cycles reduced = 317633 * 32 * 5e-9 = 50.8 ms, indeed this is the delta. 
+(latency = 16 reorder join PE ID read and mem channel)    2 PE, page size = 8, 252.44 ms -> same as normal latency = 16
+(latency = 16)    2 PE, page size = 8, 250.73  ms -> 48 cycles reduced = 317633 * 48 * 5e-9 = 76.2 ms, indeed this is (almost) the delta. 
+(latency = 1 only for write)     2 PE, page size = 8, 317.89 ms -> same as default latency -> writer is not on the critical path
+(latency = 1 only for layer cache)     2 PE, page size = 8, 318.55 ms -> same as default latency -> layer cache is not on the critical path
+(latency = 1 only for read)     2 PE, page size = 8, 250.4 ms -> same as all latency = 1
+(latency = 1)     2 PE, page size = 8, 250.98  ms -> no further improvement upon 16? -> latency somewhere else, not read? 
+(latency = 1)     16 PE @189 MHz, page size = 8, 219.37 ms -> somehow this is faster than 2 PEs?
+
+(default latency) 1 PE, page size = 4, 655.78 ms
+PE 0 computes 550423 page joins -> 550423 / 0.65 =  846,804 tasks / sec
+(default latency) 2 PE, page size = 4, 654.15 ms -> same tasks / sec
+(latency = 32)    2 PE, page size = 4, 564.622 ms ->  32 cycles reduced = 550423 * 32 * 5e-9 = 88.0 ms, indeed this is the delta. 
+(latency = 16 reorder join PE ID read and mem channel)    2 PE, page size = 4, 525.22 ms ->  same as normal latency = 16
+(latency = 16)    2 PE, page size = 4, 522.95 ms ->  48 cycles reduced = 550423 * 48 * 5e-9 = 132.1 ms, indeed this is the delta. 
+(latency = 1 only for write)     2 PE, page size = 4, 654.47 ms ->same as default latency -> writer is not on the critical path
+(latency = 1 only for layer cache)     2 PE, page size = 4, 666.37 ms -> even slower than default latency -> layer cache is not on the critical path
+(latency = 1 only for read)     2 PE, page size = 4, 489.56 ms -> seems slower than all latency=1 
+(latency = 1)     2 PE, page size = 4, 480.903 ms -> 63 cycles reduced = 550423 * 64 * 5e-9 = 176.1 ms, indeed this is the delta. 
+(latency = 1)     16 PE @189 MHz, page size = 4, 485.19 ms -> not faster than 2 PE
+
+
+So setting latency improved the performance where we use super small page sizes (e.g., 4) -> does this mean something else is on the way when using larger page sizes?
+
+I then read the summary.csv. latency = 1, 2 PE, page size = 8, 158819 + 158814 = 317633 tasks. Essentially there is no burst read. On the otherhand, the average memory access latency is only 56.4944 ns. 
+
+On interesting fact: why executor only consumes 65.1982 ms, while the scheduler consumes 250.018 ms? executor 65.1982 ms -> 4,871,806 tasks per sec, which is quite good.
+
+```
+Compute Unit Utilization
+Device,Compute Unit,Kernel,Global Work Size,Local Work Size,Number Of Calls,Dataflow Execution,Max Overlapping Executions,Dataflow Acceleration,Total Time (ms),Minimum Time (ms),Average Time (ms),Maximum Time (ms),Clock Frequency (MHz),
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1,executor,1:1:1,1:1:1,1,Yes,1,1.000000x,65.1982,65.1982,65.1982,65.1982,200,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,scheduler_1,scheduler,1:1:1,1:1:1,1,Yes,1,1.000000x,250.018,250.018,250.018,250.018,200,
+
+Data Transfer: Kernels to Global Memory
+Device,Compute Unit/Port Name,Kernel Arguments,Memory Resources,Transfer Type,Number Of Transfers,Transfer Rate (MB/s),Average Bandwidth Utilization (%),Average Size (KB),Average Latency (ns),
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1/m_axi_gmem0,in_pages_A,DDR[0],READ,317633,3144.1,16.333,0.256,56.4944,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1/m_axi_gmem1,in_pages_B,DDR[2],READ,317633,3213.13,16.6916,0.256,45.2185,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1/m_axi_gmem2,layer_cache,DDR[3],WRITE,32081,482.549,2.50675,0.079,38.3504,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1/m_axi_gmem2,layer_cache,DDR[3],READ,20167,1536.14,7.97994,0.126,213.201,
+xilinx_u250_gen3x16_xdma_shell_4_1-0,executor_1/m_axi_gmem3,out_intersect,DDR[3],WRITE,382,74.9471,0.389335,0.011,29.7408,
+```
+
+I figured out the problem!!! So the bottleneck is actually data movement. Previously I didn't insert q.finish() between input data movement and starting the kernel, thus the scheduler already starts without having memcpy finished, leading to a lot of wasted cycles, and my kernel time recorder also select the max kernel time of the two. In fact, the kernel time of OSM PIP 10M only consumes <200 ms while the entire run takes 619 ms. 
+
+Here is the debugging log: 
+
+200 MHz
+
+Duration (including memcpy out): 635.22 msDuration (kernel): 188.76 ms
+Result correct!
+Parsed intersect count : 12407
+FPGA computed intersect count : 12407
+In total, all PEs compute 1651630 page joins
+
+total read: 1651630
+total writes on layer cache: up to 1651630 - 1 writes = 1651629
+total writes on write unit: 12407
+
+Reads in the log:
+page read: 1651630 -> indeed, we read 1651630 stuff, they may be bursted, but still considered as individual read -> if one read takes 100 ns -> 1651630 * 1e-7 = 0.165 s, close to the kernel performance.
+layer cache write: 112935 -> burst + some task yields no results, should not be the bottleneck given that the number of writes << the number of page read
+write unit write: 5752 -> there are burst
+
+Seems DDR0 has quite a long latency: probably due to its position relative to the kernel. -> reordering the memory channel will indeed improve performance here, i.e., even using latency = 16 lead to only 53 ns latency on channel 0 and 1
+
+
+### 2.14 
+
+I skipped version 2.13. The various trials on 2.12 can be seen as 2.13.
+
+2.14 inherited from BFS_multi_PE_v2.12_16_PE_latency_1_fix_burst_param, with minor adjustments:
+* the join_PE_ID read in the read unit is moved to after the read request is sent
+* tried two different strategies of DDR channel mapping (read from 0, 2 or 3, 2)
+* host support various page size (previously fixed to 1024)
+
+
+
 #### Potential further optimization
 
 * change the workload -> it should join pages of at least hundreds of entries, not using the current workload with just 16 MBRs. 
