@@ -38,12 +38,12 @@ void wait_for_enter(const std::string &msg) {
 int main(int argc, char** argv)
 {
 
-	if (argc != 8) {
+	if (argc != 9) {
         // Rx bytes = Tx byte (forwarding the data)
         std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
-			"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
+			"<5: Tree 2 level> <6: Max entry num in a node> <7: page_bytes> <8: num results>" << std::endl;
 		std::cout << "Example Usage: ./host xclbin/vadd.hw.xclbin /mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_A.bin "
-			"/mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_B.bin 3 3 128 39600";
+			"/mnt/scratch/wenqi/spatial-join-baseline/cpp/tree_B.bin 3 3 64 4096 39600";
         exit(1);
     }
 
@@ -52,9 +52,11 @@ int main(int argc, char** argv)
     int max_level_A = stoi(argv[4]);
     int max_level_B = stoi(argv[5]);
 	assert (max_level_A <= max_level_B);
-    int page_bytes = 4096; // page size -> used in the index bin
 	int max_entry_num = stoi(argv[6]);   // max number of entries per page (set by CPU)
-	long sw_num_results = stoi(argv[7]);
+    int page_bytes = stoi(argv[7]);; // page size -> used in the index bin
+	assert (page_bytes <= 4096); // the read input burst FIFO length has a limit
+	assert (page_bytes % 64 == 0); // must be aligned with 64-byte AXI
+	long sw_num_results = stoi(argv[8]);
 	int entry_axi = max_entry_num % 3 == 0? max_entry_num / 3 : max_entry_num / 3 + 1;
 	int axi_per_page = 1 + entry_axi;   // number of 64-byte read per node, <= page_bytes, decided by entry_num
 	if (axi_per_page * 64 > page_bytes) {
@@ -196,9 +198,12 @@ int main(int argc, char** argv)
         buffer_in_pages_A,
         buffer_in_pages_B,
         },0/* 0 means from host*/));
+    q.finish();
+    auto t_before_kernel = chrono::high_resolution_clock::now();
     OCL_CHECK(err, err = q.enqueueTask(krnl_scheduler));
     OCL_CHECK(err, err = q.enqueueTask(krnl_executor));
     q.finish();
+    auto t_after_kernel = chrono::high_resolution_clock::now();
     
     // Copy Result from Device Global Memory to Host Local Memory
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out},CL_MIGRATE_MEM_OBJECT_HOST));
@@ -206,8 +211,10 @@ int main(int argc, char** argv)
 
     auto end = chrono::high_resolution_clock::now();
     double duration = (chrono::duration_cast<chrono::microseconds>(end-start).count()) / 1000.0;
+    double duration_kernel = (chrono::duration_cast<chrono::microseconds>(t_after_kernel-t_before_kernel).count()) / 1000.0;
 
-    printf("Duration (including memcpy out): %.2lf ms", duration); 
+    printf("Duration (including memcpy out): %.2lf ms\n", duration); 
+    printf("Duration (kernel): %.2lf ms\n", duration_kernel); 
 
     if (out[0] == sw_num_results) {
         cout << endl << "Result correct!" << endl;
@@ -217,10 +224,13 @@ int main(int argc, char** argv)
     cout << "Parsed intersect count : " << sw_num_results << endl;
     cout << "FPGA computed intersect count : " << out[0] << endl;
 
+    int total_task_count = 0;
     for (int PE_id = 0; PE_id < N_JOIN_PE; PE_id++) {
         int task_count = out[1 + PE_id];
+	total_task_count += task_count;
         cout << "PE " << PE_id << " computes " << task_count << " page joins" << endl;
     }
+        cout << "In total, all PEs compute " << total_task_count << " page joins" << endl;
     
     return  0;
 }

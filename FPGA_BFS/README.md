@@ -499,14 +499,26 @@ write unit write: 5752 -> there are burst
 Seems DDR0 has quite a long latency: probably due to its position relative to the kernel. -> reordering the memory channel will indeed improve performance here, i.e., even using latency = 16 lead to only 53 ns latency on channel 0 and 1
 
 
-### 2.14 
+### V3.1 
 
-I skipped version 2.13. The various trials on 2.12 can be seen as 2.13.
+I call this a major update as it supports various page sizes, passing as an input argument, thus the data movement cost on PCIe can be minimized. 
 
-2.14 inherited from BFS_multi_PE_v2.12_16_PE_latency_1_fix_burst_param, with minor adjustments:
+3.1 inherited from BFS_multi_PE_v2.12_16_PE_latency_1_fix_burst_param, with minor adjustments:
 * the join_PE_ID read in the read unit is moved to after the read request is sent
-* tried two different strategies of DDR channel mapping (read from 0, 2 or 3, 2)
+* use two different strategies of DDR channel mapping (read from 3, 2; layer cache / read: 0)
 * host support various page size (previously fixed to 1024)
+* AXI latency always set to 1
+
+
+Memory channel mapping A: read -> 0, 2; write / layer cache: 3
+Run 0 FPGA end-to-end: 253.36 ms
+Run 0 FPGA kernel: 201.77 ms
+Read channels latency: 49~55 ns
+
+Memory channel mapping B: read -> 3, 2; write / layer cache: 0
+Run 0 FPGA end-to-end: 242.37 ms
+Run 0 FPGA kernel: 191.03 ms -> 5% better than the first mapping
+Read channels latency: 50~51 ns -> 10% better than the first mapping
 
 
 

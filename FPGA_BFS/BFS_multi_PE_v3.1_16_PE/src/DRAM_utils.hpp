@@ -56,7 +56,9 @@ void read_nodes(
 	const int entry_axi = max_entry_num % 3 == 0? max_entry_num / 3 : max_entry_num / 3 + 1;
 	const int axi_per_page = 1 + entry_axi;   // number of 64-byte read per node, <= page_bytes, decided by entry_num
 
-	const int max_prefetch_request = 32;
+	// Note: here, must make sure the total read length request does not exceed num_read_outstanding * max_read_burst_length, otherwise
+	//   deadlock will appear, because the data FIFO is full
+	const int max_prefetch_request = 16;
 	int join_PE_ID_cache[max_prefetch_request];
 
     while (true) {
@@ -70,7 +72,6 @@ void read_nodes(
 			while ((!axis_page_ID_pair_read_nodes.empty() || !axis_join_PE_ID.empty()) &&
 				current_request_count < max_prefetch_request ) {
 
-				join_PE_ID_cache[current_request_count] = block_read<int>(axis_join_PE_ID);
 				pair_t page_ID_pair = block_read<pair_t>(axis_page_ID_pair_read_nodes);
 
 				int page_ID_A = page_ID_pair.id_A;
@@ -81,6 +82,7 @@ void read_nodes(
 				in_pages_A.read_request(start_addr_A, axi_per_page);
 				in_pages_B.read_request(start_addr_B, axi_per_page);
 				
+				join_PE_ID_cache[current_request_count] = block_read<int>(axis_join_PE_ID);
 				current_request_count++;
 			}
 

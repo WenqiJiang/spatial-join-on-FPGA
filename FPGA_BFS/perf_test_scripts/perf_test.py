@@ -49,7 +49,7 @@ get_tree_depth_py_dir = args.get_tree_depth_py_dir
 num_runs = args.num_runs
 
 
-def get_tree_depth_procedure(tree="A"):
+def get_tree_depth_procedure(tree="A", node_bytes=4096):
 	"""
 	Input: "A" or "B"
 	Output: depth
@@ -57,8 +57,8 @@ def get_tree_depth_procedure(tree="A"):
 	assert tree == 'A' or tree == 'B'
 
 	log_tree_depth = f'log_tree_depth_{tree}'
-	cmd_depth = "python {} --tree_bin_dir {} > {}".format(
-		get_tree_depth_py_dir, f'tree_{tree}.bin', log_tree_depth)
+	cmd_depth = "python {} --tree_bin_dir {} --node_bytes {} > {}".format(
+		get_tree_depth_py_dir, f'tree_{tree}.bin', node_bytes, log_tree_depth)
 	print("Get tree depth {} command:\n{}".format(tree, cmd_depth))
 	os.system(cmd_depth)
 	level = get_number_file_with_keywords(log_tree_depth, "loaded index max depth:", "int")
@@ -105,6 +105,7 @@ def get_FPGA_summary_time(fname):
 
 if __name__ == '__main__':
     
+	print("This script is only compatible to FPGA V3.1 and above which passes the page size as a parameter")
 	# Init: clear up old bin, which is saved in the current dir
 	tree_A_dir = 'tree_A.bin' # os.path.join(os.path.dirname(cpp_exe_dir), 'tree_A.bin')
 	tree_B_dir = 'tree_B.bin' # os.path.join(os.path.dirname(cpp_exe_dir), 'tree_B.bin')
@@ -118,13 +119,14 @@ if __name__ == '__main__':
 	print("Executing cpp command:\n", cmd_cpp)
 	os.system(cmd_cpp)
 	num_results = get_number_file_with_keywords(log_cpp, "Number of results:", "int")
+	node_bytes = get_number_file_with_keywords(log_cpp, "Bytes per node", "int")
 	time_ms_CPU = get_number_file_with_keywords(log_cpp, "Sync traversal duration:", "float")
 	print("Number of results: ", num_results)
 	print("CPU sync traversal time: {} ms".format(time_ms_CPU))
 
 	# Second, get tree depth
-	level_A = get_tree_depth_procedure("A")
-	level_B = get_tree_depth_procedure("B")
+	level_A = get_tree_depth_procedure("A", node_bytes)
+	level_B = get_tree_depth_procedure("B", node_bytes)
 	print("Level A: ", level_A)
 	print("Level B: ", level_B)
 
@@ -132,20 +134,21 @@ if __name__ == '__main__':
 	for run_id in range(num_runs):
 		"""
 		std::cout << "Usage: " << argv[0] << "<1: xclbin>  <2: TreeBin Dir 1> <3: TreeBin Dir 2> <4: Tree 1 level> " 
-		"<5: Tree 2 level> <6: Max entry num in a node> <7: num results>" << std::endl;
+		"<5: Tree 2 level> <6: Max entry num in a node>  <7: page_bytes> <8: num results>" << std::endl;
 		"""
 		host_full = os.path.join(FPGA_project_dir, FPGA_host_name)
 		xclbin_full = os.path.join(FPGA_project_dir, FPGA_bin_name)
 		tree_A_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_A.bin')
 		tree_B_full = os.path.join(os.path.dirname(cpp_exe_dir), 'tree_B.bin')
 		log_FPGA = 'log_FPGA'
-		cmd_FPGA = f"{host_full} {xclbin_full} {tree_A_dir} {tree_B_dir} {level_A} {level_B} {max_entry_size} {num_results} > {log_FPGA}"
+		cmd_FPGA = f"{host_full} {xclbin_full} {tree_A_dir} {tree_B_dir} {level_A} {level_B} {max_entry_size} {node_bytes} {num_results} > {log_FPGA}"
 		print("Executing FPGA command:\n", cmd_FPGA)
 		os.system(cmd_FPGA)
 		
 		assert assert_keywords_in_file(log_FPGA, "Result correct!") == True
 		time_ms_FPGA_e2e = get_number_file_with_keywords(log_FPGA, "Duration (including memcpy out):", "float")
+		time_ms_FPGA_kernel = get_number_file_with_keywords(log_FPGA, "Duration (kernel):", "float")
+		# time_ms_executor, time_ms_scheduler = get_FPGA_summary_time(FPGA_log_name)
+		# time_ms_FPGA_kernel = np.amax([time_ms_executor, time_ms_scheduler])
 		print("Run {} FPGA end-to-end: {} ms".format(run_id, time_ms_FPGA_e2e))
-		time_ms_executor, time_ms_scheduler = get_FPGA_summary_time(FPGA_log_name)
-		time_ms_FPGA_kernel = np.amax([time_ms_executor, time_ms_scheduler])
 		print("Run {} FPGA kernel: {} ms".format(run_id, time_ms_FPGA_kernel))

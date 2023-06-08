@@ -65,7 +65,7 @@ num_runs = args.num_runs
 datasets = ["Uniform", "OSM"]
 join_types = ["Point-in-Polygon", "Polygon-Polygon"]
 size_scales = [int(1e5), int(1e6), int(1e7)] # measure 100K~1M
-max_entry_sizes = [16, 32, 48, 64]
+max_entry_sizes = [8, 16, 32]
 
 def parse_perf_result(fname, num_runs):
     """

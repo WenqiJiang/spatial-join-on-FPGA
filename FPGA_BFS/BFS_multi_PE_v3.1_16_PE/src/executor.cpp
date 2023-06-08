@@ -54,16 +54,16 @@ void executor(
 #pragma HLS INTERFACE axis port=axis_join_finish
 
 // in runtime (should from DRAM)
-#pragma HLS INTERFACE m_axi port=in_pages_A num_read_outstanding=32 max_read_burst_length=16  offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=in_pages_B num_read_outstanding=32 max_read_burst_length=16  offset=slave bundle=gmem1
+#pragma HLS INTERFACE m_axi port=in_pages_A latency=1 num_read_outstanding=32 max_read_burst_length=32  offset=slave bundle=gmem0
+#pragma HLS INTERFACE m_axi port=in_pages_B latency=1 num_read_outstanding=32 max_read_burst_length=32  offset=slave bundle=gmem1
 
 // output streams
 #pragma HLS INTERFACE axis port=axis_page_pair_scheduler
 #pragma HLS INTERFACE axis port=axis_intersect_count_directory_scheduler
 
 // out 
-#pragma HLS INTERFACE m_axi port=layer_cache num_read_outstanding=32 max_read_burst_length=16 num_write_outstanding=32 max_write_burst_length=16 offset=slave bundle=gmem2  max_write_burst_length=64
-#pragma HLS INTERFACE m_axi port=out_intersect num_read_outstanding=32 max_read_burst_length=16 num_write_outstanding=32 max_write_burst_length=16  offset=slave bundle=gmem3  max_write_burst_length=64
+#pragma HLS INTERFACE m_axi port=layer_cache latency=1 num_read_outstanding=32 max_read_burst_length=16 num_write_outstanding=32 max_write_burst_length=16 offset=slave bundle=gmem2  max_write_burst_length=64
+#pragma HLS INTERFACE m_axi port=out_intersect latency=1 num_write_outstanding=32 max_write_burst_length=16  offset=slave bundle=gmem3  max_write_burst_length=64
 
 #pragma HLS dataflow
 
