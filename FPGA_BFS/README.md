@@ -503,6 +503,9 @@ Seems DDR0 has quite a long latency: probably due to its position relative to th
 
 I call this a major update as it supports various page sizes, passing as an input argument, thus the data movement cost on PCIe can be minimized. 
 
+1~8 PE: V3.2 -> same some control signal FIFOs
+16 PE: V3.1 -> using shift register to implement FIFOs can lead to routing errors
+
 3.1 inherited from BFS_multi_PE_v2.12_16_PE_latency_1_fix_burst_param, with minor adjustments:
 * the join_PE_ID read in the read unit is moved to after the read request is sent
 * use two different strategies of DDR channel mapping (read from 3, 2; layer cache / read: 0)
@@ -520,8 +523,75 @@ Run 0 FPGA end-to-end: 242.37 ms
 Run 0 FPGA kernel: 191.03 ms -> 5% better than the first mapping
 Read channels latency: 50~51 ns -> 10% better than the first mapping
 
+### V3.2 optimize BRAM usage
 
+This is for the resource consumption section. The 16 PE version of V3.1 consume 32% of BRAM in the kernels. 
 
+1~8 PE: V3.2 -> same some control signal FIFOs
+16 PE: V3.1 -> using shift register to implement FIFOs can lead to routing errors. I tried several versions of P&R hints but none of them worked. 
+
+Here is the FIFO BRAM consumptions of a single PE in V3.1:
+
+```
+    * FIFO:
+    +------------------------------------------------+---------+------+----+-----+------+-----+---------+
+    |                      Name                      | BRAM_18K|  FF  | LUT| URAM| Depth| Bits| Size:D*B|
+    +------------------------------------------------+---------+------+----+-----+------+-----+---------+
+    |layer_cache_c_U                                 |        0|     7|   0|    -|    10|   64|      640|
+    |max_entry_num_c_U                               |        0|     5|   0|    -|     3|   32|       96|
+    |max_level_A_c_U                                 |        0|     7|   0|    -|    10|   32|      320|
+    |max_level_B_c_U                                 |        0|     7|   0|    -|    10|   32|      320|
+    |out_intersect_c_U                               |        0|     7|   0|    -|    11|   64|      704|
+    |root_id_A_c_U                                   |        0|     7|   0|    -|    10|   32|      320|
+    |root_id_B_c_U                                   |        0|     7|   0|    -|    10|   32|      320|
+    |s_finish_join_PE_out56_U                        |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_join_PE_out_aggregated_U               |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_layer_cache_burst_out57_U              |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_layer_cache_out_U                      |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_parse_page_out55_U                     |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_read_out_U                             |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_read_out_replicated54_U                |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_scheduler_out_U                        |        0|    68|   0|    -|     2|   32|       64|
+    |s_finish_write_burst_out58_U                    |        0|    68|   0|    -|     2|   32|       64|
+    |s_intersect_count_directory44_U                 |        1|    95|   0|    -|   512|   32|    16384|
+    |s_intersect_count_leaf46_U                      |        1|    95|   0|    -|   512|   32|    16384|
+    |s_meta_A40_U                                    |        8|   543|   0|    -|   512|  224|   114688|
+    |s_meta_B41_U                                    |        8|   543|   0|    -|   512|  224|   114688|
+    |s_page_A42_U                                    |        8|   543|   0|    -|   512|  160|    81920|
+    |s_page_A_raw38_U                                |       15|  1056|   0|    -|   512|  512|   262144|
+    |s_page_B43_U                                    |        8|   543|   0|    -|   512|  160|    81920|
+    |s_page_B_raw39_U                                |       15|  1056|   0|    -|   512|  512|   262144|
+    |s_result_pair_directory45_U                     |        4|   287|   0|    -|  1024|   65|    66560|
+    |s_result_pair_directory_burst50_U               |        4|   287|   0|    -|  1024|   65|    66560|
+    |s_result_pair_directory_burst_contain_last49_U  |        1|    95|   0|    -|   512|   32|    16384|
+    |s_result_pair_directory_burst_length48_U        |        1|    95|   0|    -|   512|   32|    16384|
+    |s_result_pair_leaf47_U                          |        4|   287|   0|    -|  1024|   65|    66560|
+    |s_result_pair_leaf_burst53_U                    |        4|   287|   0|    -|  1024|   65|    66560|
+    |s_result_pair_leaf_burst_contain_last52_U       |        1|    95|   0|    -|   512|   32|    16384|
+    |s_result_pair_leaf_burst_length51_U             |        1|    95|   0|    -|   512|   32|    16384|
+    +------------------------------------------------+---------+------+----+-----+------+-----+---------+
+    |Total                                           |       84|  6661|   0|    0| 10322| 2820|  1285344|
+    +------------------------------------------------+---------+------+----+-----+------+-----+---------+
+```
+
+Candidate for optimizations:
+s_meta_A, s_meta_B -> len 512 to 32; BRAM 8 -> 0
+s_page_A, s_page_B  -> len 512 to 256; BRAM still 8 
+s_page_A_raw, s_page_B_raw -> len 512 to 128; BRAM still 15 
+
+s_result_pair_directory -> len 1024 to 512; BRAM still 4 
+s_result_pair_directory_burst -> len 1024 to 512; BRAM still 4
+s_result_pair_directory_burst_length -> len 512 to 32; BRAM 1 -> 0
+s_result_pair_directory_burst_contain_last -> len 512 to 32; BRAM 1 -> 0
+s_intersect_count_directory -> len 512 to 32; BRAM 1 -> 0
+
+s_result_pair_leaf -> len 1024 to 512; BRAM still 4 
+s_result_pair_leaf_burst -> len 1024 to 512; BRAM still 4 
+s_result_pair_leaf_burst_length -> len 512 to 32; BRAM 1 -> 0
+s_result_pair_leaf_burst_contain_last -> len 512 to 32; BRAM 1 -> 0
+s_intersect_count_leaf -> len 512 to 32; BRAM 1 -> 0
+
+Conclusion: changing len 512 or 1024 to shorter does not help resource consumption, but we can choose to save the resources for those with only control signals. So we keep them as 512 in the end. 
 #### Potential further optimization
 
 * change the workload -> it should join pages of at least hundreds of entries, not using the current workload with just 16 MBRs. 

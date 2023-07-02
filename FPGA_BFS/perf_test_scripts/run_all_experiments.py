@@ -49,6 +49,11 @@ parser.add_argument('--C_file_dir', type=str, default='/mnt/scratch/wenqi/spatia
 parser.add_argument('--get_tree_depth_py_dir', type=str, default='/mnt/scratch/wenqi/spatial-join-baseline/python/get_tree_depth.py', help="the get tree depth file dir")
 parser.add_argument('--num_runs', type=int, default=1, help="number of FPGA runs")
 
+parser.add_argument('--dataset', type=str, default=None, help="set a speficic data name (OSM or Uniform)")
+parser.add_argument('--join_type', type=str, default=None, help="set a speficic join type (Point-in-Polygon or Polygon-Polygon)")
+parser.add_argument('--dataset_size', type=int, default=None, help="set a speficic data size")
+parser.add_argument('--max_entry', type=int, default=None, help="set a speficic max R-tree node size")
+
 args = parser.parse_args()
 out_json_fname = args.out_json_fname
 overwrite = args.overwrite
@@ -62,10 +67,24 @@ C_file_dir = args.C_file_dir
 get_tree_depth_py_dir = args.get_tree_depth_py_dir
 num_runs = args.num_runs
 
-datasets = ["Uniform", "OSM"]
-join_types = ["Point-in-Polygon", "Polygon-Polygon"]
-size_scales = [int(1e5), int(1e6), int(1e7)] # measure 100K~1M
-max_entry_sizes = [8, 16, 32]
+if args.dataset is None:
+    datasets = ['Uniform','OSM']
+else:
+    assert args.dataset in ['Uniform','OSM']
+    datasets = [args.dataset]
+if args.join_type is None:
+    join_types = ["Point-in-Polygon", "Polygon-Polygon"]
+else:
+    args.join_type in ["Point-in-Polygon", "Polygon-Polygon"]
+    join_types = [args.join_type]
+if args.dataset_size is None:
+    dataset_sizes = [int(1e5), int(1e6), int(1e7)]
+else:
+    dataset_sizes = [args.dataset_size]
+if args.max_entry is None:
+    max_entries = [8, 16, 32]
+else:
+    max_entries = [args.max_entry]
 
 def parse_perf_result(fname, num_runs):
     """
@@ -157,8 +176,8 @@ else:
 
 for dataset in datasets:
     for join_type in join_types:
-        for size_dataset_A in size_scales:
-            for size_dataset_B in size_scales:
+        for size_dataset_A in dataset_sizes:
+            for size_dataset_B in dataset_sizes:
 
                 # "Point-in-Polygon": Point File 0 (size_dataset_A), Polygon File 0 (size_dataset_B)
                 # "Polygon-Polygon": Polygon File 0 (size_dataset_A), Polygon File 1 (size_dataset_B)
@@ -187,7 +206,7 @@ for dataset in datasets:
                 if size_dataset_A > size_dataset_B:
                     C_file_A, C_file_B = swap(C_file_A, C_file_B)
 
-                for max_entry_size in max_entry_sizes:
+                for max_entry_size in max_entries:
                     
                     print("", flush=True)
                     print(f"Config: dataset:{dataset}, join_type:{join_type}, size_dataset_A:{size_dataset_A}, size_dataset_B:{size_dataset_B}, max_entry_size:{max_entry_size}")
